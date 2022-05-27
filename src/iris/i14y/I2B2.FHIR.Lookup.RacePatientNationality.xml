@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.RacePatientNationality.lut">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.RacePatientNationality" key="hispanic">2135-2~Hispanic or Latino</entry>
+<entry table="I2B2.FHIR.Lookup.RacePatientNationality" key="unknown">2186-5~Not Hispanic or Latino</entry>
+</lookupTable>
+</Document></Export>

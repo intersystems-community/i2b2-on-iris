@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.Patient.LUT">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.Patient" key="address_country">US</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="address_type">both</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="address_use">home</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="communication-language_system">http://hl7.org/fhir/ValueSet/languages</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier-mrn_assigner_display">i2b2</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier-mrn_system"></entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier-mrn_type_coding_code">MRN</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier-mrn_type_coding_system">http://terminology.hl7.org/CodeSystem/v2-0203</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier-mrn_use">usual</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier_assigner_display">i2b2</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier_system"></entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier_type_coding_code">PLAC</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier_type_coding_system">http://terminology.hl7.org/CodeSystem/v2-0203</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="identifier_use">usual</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="marital-status_system">http://terminology.hl7.org/CodeSystem/v3-MaritalStatus</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="name_use">usual</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="patient-nationality_system">http://terminology.hl7.org/CodeSystem/v3-Ethnicity</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="patient-nationality_url">http://hl7.org/fhir/StructureDefinition/patient-nationality</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="patient-religion_system">http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="patient-religion_url">http://hl7.org/fhir/StructureDefinition/patient-religion</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="us-core-race_system">http://terminology.hl7.org/CodeSystem/v3-Race</entry>
+<entry table="I2B2.FHIR.Lookup.Patient" key="us-core-race_url">http://terminology.hl7.org/CodeSystem/v3-Race</entry>
+</lookupTable>
+</Document></Export>

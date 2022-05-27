@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.MaritalStatus.lut">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.MaritalStatus" key="divorced">D~divorced</entry>
+<entry table="I2B2.FHIR.Lookup.MaritalStatus" key="married">M~married</entry>
+<entry table="I2B2.FHIR.Lookup.MaritalStatus" key="single">U~unmarried</entry>
+<entry table="I2B2.FHIR.Lookup.MaritalStatus" key="unknown">UNK~unknown</entry>
+<entry table="I2B2.FHIR.Lookup.MaritalStatus" key="widow">W~widowed</entry>
+</lookupTable>
+</Document></Export>

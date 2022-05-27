@@ -1,0 +1,37 @@
+zn "IRISAPP"
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/create_i2b2metadata_tables.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/schemes_insert_data.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/table_access_insert_data.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_demo_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_dx_icd9_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_dx_icd10_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_labs_V1.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_labs_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_med_alpha_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_med_va_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_px_hcpcs_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_px_icd9_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_px_icd10_V2.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_visit_details_V1.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_dx_icd10_icd9_V1.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/insert_metadata_ACT_CPT_PX_2018AA_adapted.sql",, 1, ";")
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/irisrun/repo/act_howto/zz_create_i2b2metadata_index.sql",, 1, ";")
+
+halt

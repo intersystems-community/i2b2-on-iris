@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.Religion.lut">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.Religion" key="agnostic">1004~Agnosticism</entry>
+<entry table="I2B2.FHIR.Lookup.Religion" key="atheist">1007~Atheism</entry>
+<entry table="I2B2.FHIR.Lookup.Religion" key="christian">1013~Christian (non-Catholic, non-specific)</entry>
+<entry table="I2B2.FHIR.Lookup.Religion" key="jewish">1026~Judaism</entry>
+<entry table="I2B2.FHIR.Lookup.Religion" key="muslim">1023~Islam</entry>
+<entry table="I2B2.FHIR.Lookup.Religion" key="roman catholic">1041~Roman Catholic Church</entry>
+</lookupTable>
+</Document></Export>

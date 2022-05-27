@@ -1,0 +1,36 @@
+version: '3.6'
+services:
+  iris:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: --check-caps false
+    ports:
+      - 51773:1972/tcp
+      - 51773:1972/udp
+      - 52773:52773
+      - 53773:53773
+    volumes:
+      - ./:/irisrun/repo
+
+  i2b2-core-server:
+    build:
+      context: ./dockerize_i2b2_core-server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8788:8787
+      - 9991:9990
+    depends_on:
+      - iris
+
+  i2b2-webclient:
+    build:
+      context: ./dockerize_i2b2_webclient
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - 8082:80
+    depends_on:
+      - i2b2-core-server

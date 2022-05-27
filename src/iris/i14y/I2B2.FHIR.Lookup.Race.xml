@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.Race.LUT">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.Race" key="asian">2028-9~asian</entry>
+<entry table="I2B2.FHIR.Lookup.Race" key="black">2054-5~Black or African American</entry>
+<entry table="I2B2.FHIR.Lookup.Race" key="hispanic">2131-1~Other Race</entry>
+<entry table="I2B2.FHIR.Lookup.Race" key="indian">1002-5~American Indian or Alaska Native</entry>
+<entry table="I2B2.FHIR.Lookup.Race" key="white">2106-3~White</entry>
+</lookupTable>
+</Document></Export>

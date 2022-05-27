@@ -1,0 +1,5 @@
+zn "IRISAPP"
+
+do $System.SQL.DDLImport("Oracle", "_SYSTEM", "/opt/irisbuild/force_single_data_source.sql",, 1, ";")
+
+halt

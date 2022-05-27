@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.CommunicationLanguage.lut">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.CommunicationLanguage" key="english">en~english</entry>
+<entry table="I2B2.FHIR.Lookup.CommunicationLanguage" key="german">de~german</entry>
+<entry table="I2B2.FHIR.Lookup.CommunicationLanguage" key="spanish">es~spanish</entry>
+</lookupTable>
+</Document></Export>

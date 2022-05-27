@@ -1,0 +1,5 @@
+zn "IRISAPP"
+
+do ##class(I2B2.FHIR.Install).LoadDefData("/opt/irisbuild/dataset/data.gof")
+
+halt

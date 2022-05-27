@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.Gender.LUT">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.Gender" key="F">female</entry>
+<entry table="I2B2.FHIR.Lookup.Gender" key="M">male</entry>
+<entry table="I2B2.FHIR.Lookup.Gender" key="unknown">unknown</entry>
+</lookupTable>
+</Document></Export>
