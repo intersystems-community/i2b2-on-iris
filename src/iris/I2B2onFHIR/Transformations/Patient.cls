@@ -99,7 +99,7 @@ ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 
 ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 {
-	S birthday = source.json."birthDate"
+	S birthday = json."birthDate"
 	S birthday=$tr(birthday,"-/ ")
 	// нужно брать не "сейчас", а дату study date/first visit
 	S now=$zdt(+$h,8)
