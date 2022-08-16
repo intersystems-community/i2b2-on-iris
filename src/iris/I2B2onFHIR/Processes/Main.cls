@@ -17,6 +17,10 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
         ; check resource type
         set resourceType = jsonObj."resource"."resourceType"
+        ; maybe ther is difference
+        if (resourceType = "")  {
+        	set resourceType = jsonObj."resourceType"
+        }
         
         ; process resource type
         if resourceType = "Patient" {
@@ -90,3 +94,4 @@ Storage Default
 }
 
 }
+
