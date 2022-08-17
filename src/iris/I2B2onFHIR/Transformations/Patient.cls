@@ -20,9 +20,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.statecityzippath = ..StateCityZipPath(source.json)
         set target.incomecd = ..IncomeCD(source.json)
         set target.patientblob = ..PatientBlob(source.json)
-        set target.updatedate = ..UpdateDate(source.json)
+        set target.updatedate = ..CurrentDT()
         set target.downloaddate = ..DownloadDate(source.json)
-        set target.importdate = ..ImportDate(source.json)
+        set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
         set target.uploadid = ..UploadId(source.json)
 
@@ -44,21 +44,9 @@ ClassMethod SourceSystemCD(json As %DynamicObject) As %String [ Private ]
 	Q "Test"
 }
 
-ClassMethod ImportDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
-{
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
-}
-
 ClassMethod DownloadDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
 {
 	Q ""
-}
-
-ClassMethod UpdateDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
-{
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
 }
 
 ClassMethod PatientBlob(json As %DynamicObject) As %String [ Private ]
@@ -115,6 +103,12 @@ ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
 {
 	// генерим автоматически, произвольный номер
 	Q $tr($now(),".,")
+}
+
+ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
+{
+	//update_date=import_date in IRIS
+	Q $zdt($h,3)
 }
 
 }
