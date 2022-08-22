@@ -14,7 +14,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.providerpath=..ProviderPath(source.json)
         set target.sourcesystemcd="TEST"
         set target.updatedate=..CurrentDT()
-        set target.uploadid=source.json.id
+        set target.uploadid=""
 
 
 	} catch e {

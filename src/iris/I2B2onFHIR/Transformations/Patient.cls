@@ -12,9 +12,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.birthdate = source.json."birthDate"
         set target.deathdate = ..DeathDate(source.json) ;source.json
         set target.ageinyearsnum = ..AgeInYearsNum(source.json)
-        set target.languagecd = ..LanguageCD(source.json)
+        set target.languagecd = source.json.communication.language.text
         set target.racecd = ..RaceCD(source.json)
-        set target.maritalstatuscd = ..MaritalStatusCD(source.json)
+        set target.maritalstatuscd = source.json.maritalStatus.text
         set target.religioncd = source.json.extension."valueCodeableConcept".coding.code
         set target.zipcd = source.json.address."postalCode"
         set target.statecityzippath = ..StateCityZipPath(source.json)
@@ -70,17 +70,7 @@ ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
 	Q state_"\"_city_"\"_zip
 }
 
-ClassMethod MaritalStatusCD(json As %DynamicObject) As %String [ Private ]
-{
-	Q ""
-}
-
 ClassMethod RaceCD(json As %DynamicObject) As %String [ Private ]
-{
-	Q ""
-}
-
-ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 {
 	Q ""
 }
