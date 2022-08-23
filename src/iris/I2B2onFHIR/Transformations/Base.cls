@@ -1,6 +1,17 @@
 Class I2B2onFHIR.Transformations.Base Extends Ens.DataTransform
 {
 
+ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As Ens.Response) As %Status
+{
+	s sc = $$$OK
+	try {
+        set target = ##class(Ens.Response).%New()
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
 ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
 {
 	//update_date=import_date in IRIS

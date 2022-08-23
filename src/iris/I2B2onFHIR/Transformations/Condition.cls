@@ -7,8 +7,6 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	try {
         set target = ##class(I2B2onFHIR.Messages.conditionDataTransformResponse).%New()
 
-
-
 	} catch e {
 		s sc = e.AsStatus()
 	}
