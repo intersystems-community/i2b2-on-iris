@@ -8,7 +8,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.patientDataTransformResponse).%New()
         set target.sexcd = source.json."gender"
         set target.patientnum = ..PatientNum(source.json) ;source.json
-        set target.vitalstatuscd = source.json."deceasedBoolean"
+        set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
         set target.deathdate = ..DeathDate(source.json) ;source.json
         set target.ageinyearsnum = ..AgeInYearsNum(source.json)
@@ -87,6 +87,13 @@ ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 ClassMethod DeathDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
 {
 	Q ""
+}
+
+ClassMethod VitalStatusCD(json As %DynamicObject) As %String [ Private ]
+{
+	//IF Patient.deceasedDateTime IS NOT NULL THEN 'N'
+	if json."deceasedDateTime" '= "" Q "N"
+	Q "Y"
 }
 
 ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
