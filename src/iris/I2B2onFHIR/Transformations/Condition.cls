@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.Condition Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.Condition Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.procedureDataTransformResponse) As %Status
@@ -16,3 +16,4 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 }
 
 }
+

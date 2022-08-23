@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.EncounterMapping Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.EncounterMapping Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.EncounterMappingTransformResponse) As %Status
@@ -14,3 +14,4 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 }
 
 }
+

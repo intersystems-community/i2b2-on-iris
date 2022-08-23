@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.VisitDimension Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.VisitDimension Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.VisitDimensionTransformResponse) As %Status
@@ -27,47 +27,5 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
-ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
-{
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
 }
 
-ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
-{
-	// генерим автоматически, произвольный номер
-	Q $tr($now(),".,")
-}
-
-ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
-{
-	I json.status="planned" Q "PRELIMINARY"
-	I json.status="arrived" Q "ACTIVE"
-	I json.status="triaged" Q "ACTIVE"
-	I json.status="in-progress" Q "ACTIVE"
-	I json.status="onleave" Q "NULL"
-	I json.status="finished" Q "FINAL"
-	I json.status="cancelled" Q "NULL"
-	I json.status="entered-in-error" Q "NULL"
-	I json.status="unknown" Q "NULL"
-	Q "NULL"
-}
-
-ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]
-{
-	if json.classHistory.class="inpatient" {
-		//calc period from json.classHistory.period
-	}
-	Q 0
-}
-
-ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
-{
-	I json.classHistory.class="inpatient" Q "IP"
-	I json.classHistory.class="outpatient" Q "OP"
-	I json.classHistory.class="ambulatory" Q "AV"
-	I json.classHistory.class="emergency" Q "ED"
-	Q ""
-}
-
-}
