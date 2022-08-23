@@ -33,8 +33,8 @@ Property uploadid As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648)
 
 Storage Default
 {
-<Data name="encounterDataTransformResponseDefaultData">
-<Subscript>"encounterDataTransformResponse"</Subscript>
+<Data name="VisitDimensionTransformResponseDefaultData">
+<Subscript>"VisitDimensionTransformResponse"</Subscript>
 <Value name="1">
 <Value>patientnum</Value>
 </Value>
@@ -81,8 +81,9 @@ Storage Default
 <Value>uploadid</Value>
 </Value>
 </Data>
-<DefaultData>encounterDataTransformResponseDefaultData</DefaultData>
+<DefaultData>VisitDimensionTransformResponseDefaultData</DefaultData>
 <Type>%Storage.Persistent</Type>
 }
 
 }
+

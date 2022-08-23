@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.Practitioner Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.Practitioner Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.practitionerDataTransformResponse) As %Status
@@ -12,9 +12,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.providerblob=""
         set target.providerid=..ProviderId()
         set target.providerpath=..ProviderPath(source.json)
-        set target.sourcesystemcd="TEST"
+        set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
-        set target.uploadid=source.json.id
+        set target.uploadid=..UploadId(source.json)
 
 
 	} catch e {
@@ -23,10 +23,24 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
-ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
+ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 {
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
+	//Concat:('\i2b2\Providers\', Encounter.classHistory.class, '\' , provider_dimension.name_char, '\')
+	//A string representing the unique position of a provider in a hierarchical department tree.
+	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
+	S $p(result,"\",2)="i2b2"
+	S $p(result,"\",3)="Providers"
+	S $p(result,"\",4)="" ;Encounter.classHistory.class -- Как получить здесь???
+	S $p(result,"\",5)=..NameChar(json)
+	S $p(result,"\",6)=""
+}
+
+ClassMethod ProviderId() As %String [ Private ]
+{
+	// Автоматически генерируем код следующим образом: 
+	//в начале символы 'LCS-I2B2:D0001090' затем какой-то набор чисел. 
+	//Пример:LCS-I2B2:D000109065
+	Q "LCS-I2B2:D0001090"_$tr($now(),".,")
 }
 
 ClassMethod NameChar(json As %DynamicObject) As %Library.String
@@ -49,26 +63,6 @@ ClassMethod NameChar(json As %DynamicObject) As %Library.String
 		S result = result_", "_prefix
 	}
 	Q result
-}
-
-ClassMethod ProviderId() As %String [ Private ]
-{
-	// Автоматически генерируем код следующим образом: 
-	//в начале символы 'LCS-I2B2:D0001090' затем какой-то набор чисел. 
-	//Пример:LCS-I2B2:D000109065
-	Q "LCS-I2B2:D0001090"_$tr($now(),".,")
-}
-
-ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
-{
-	//Concat:('\i2b2\Providers\', Encounter.classHistory.class, '\' , provider_dimension.name_char, '\')
-	//A string representing the unique position of a provider in a hierarchical department tree.
-	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
-	S $p(result,"\",2)="i2b2"
-	S $p(result,"\",3)="Providers"
-	S $p(result,"\",4)="" ;Encounter.classHistory.class -- Как получить здесь???
-	S $p(result,"\",5)=..NameChar(json)
-	S $p(result,"\",6)=""
 }
 
 }

@@ -66,16 +66,44 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
             s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
 
         } elseif resourceType = "ExplanationOfBenefit" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
+            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+            set transformRequest.json = jsonObj
+            
+            set sc = ##class(I2B2onFHIR.Transformations.ExplanationOfBenefit).Transform(transformRequest, .transformResponse)
+            quit:$$$ISERR(sc)
+
+            //if we have no errors - save data
+            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
 
         } elseif resourceType = "Condition" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
+            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+            set transformRequest.json = jsonObj
+            
+            set sc = ##class(I2B2onFHIR.Transformations.Condition).Transform(transformRequest, .transformResponse)
+            quit:$$$ISERR(sc)
+
+            //if we have no errors - save data
+            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
 
         } elseif resourceType = "Claim" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
+            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+            set transformRequest.json = jsonObj
+            
+            set sc = ##class(I2B2onFHIR.Transformations.Claim).Transform(transformRequest, .transformResponse)
+            quit:$$$ISERR(sc)
+
+            //if we have no errors - save data
+            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
 
         } elseif resourceType = "AuditEvent" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
+            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+            set transformRequest.json = jsonObj
+            
+            set sc = ##class(I2B2onFHIR.Transformations.AuditEvent).Transform(transformRequest, .transformResponse)
+            quit:$$$ISERR(sc)
+
+            //if we have no errors - save data
+            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
 
         } elseif resourceType = "" {
             $$$TRACE("Empty resource type")

@@ -5,7 +5,7 @@ Parameter ADAPTER = "EnsLib.SQL.OutboundAdapter";
 
 Parameter INVOCATION = "Queue";
 
-Method patientDataSave(pRequest As I2B2onFHIR.Messages.patientDataTransformResponse, Output pResponse As Ens.Response)
+Method patientDataSave(pRequest As I2B2onFHIR.Messages.PatientDimensionTransformResponse, Output pResponse As Ens.Response)
 {
     s sc = $$$OK
     try {
@@ -34,10 +34,11 @@ Method patientDataSave(pRequest As I2B2onFHIR.Messages.patientDataTransformRespo
 XData MessageMap
 {
 <MapItems>
-  <MapItem MessageType="I2B2onFHIR.Messages.patientDataTransformResponse">
+  <MapItem MessageType="I2B2onFHIR.Messages.PatientDimensionTransformResponse">
     <Method>patientDataSave</Method>
   </MapItem>
 </MapItems>
 }
 
 }
+

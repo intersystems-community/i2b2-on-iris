@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.VisitDimension Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.VisitDimension Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.VisitDimensionTransformResponse) As %Status
@@ -16,27 +16,15 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.locationcd=source.json.location.location.display
         set target.locationpath=""
         set target.patientnum=..PatientNum(source.json)
-        set target.sourcesystemcd="Test"
+        set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.startdate=source.json.period.start
         set target.updatedate=..CurrentDT()
-        set target.uploadid="" ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
+        set target.uploadid= ..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
         set target.visitblob=""
 	} catch e {
 		s sc = e.AsStatus()
 	}
 	q sc
-}
-
-ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
-{
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
-}
-
-ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
-{
-	// генерим автоматически, произвольный номер
-	Q $tr($now(),".,")
 }
 
 ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
@@ -71,3 +59,4 @@ ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
 }
 
 }
+
