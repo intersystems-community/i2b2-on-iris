@@ -1,0 +1,146 @@
+Class I2B2onFHIR.Operations.CheckDataInI2B2 Extends Ens.BusinessOperation
+{
+
+Parameter ADAPTER = "EnsLib.SQL.OutboundAdapter";
+
+Parameter INVOCATION = "Queue";
+
+Method visitDimensionCheck(pRequest As I2B2onFHIR.Messages.VisitDimensionTransformResponse, Output pResponse As I2B2onFHIR.Messages.dataCheckBaseResponse)
+{
+    s sc = $$$OK
+    try {
+      set pResponse = ##class(I2B2onFHIR.Messages.dataCheckBaseResponse).%New()
+
+      set sql = "SELECT %ID FROM ""public"".""visit_dimension"" WHERE upload_id = ?"
+  
+      set ts = ##class(%SQL.Statement).%New()
+      set sc=ts.%Prepare(sql)
+      quit:$$$ISERR(sc)
+
+      set tr = ts.%Execute(pRequest.uploadid)
+      if tr.%Next() {
+        set pResponse.recordId = tr.%ID
+      
+      } else {
+        set pResponse.recordId = -1
+      
+      }
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
+Method encounterMappingCheck(pRequest As I2B2onFHIR.Messages.EncounterMappingTransformResponse, Output pResponse As I2B2onFHIR.Messages.dataCheckBaseResponse)
+{
+    s sc = $$$OK
+    try {
+      set pResponse = ##class(I2B2onFHIR.Messages.dataCheckBaseResponse).%New()
+
+      set sql = "SELECT %ID FROM ""public"".""encounter_mapping"" WHERE upload_id = ?"
+  
+      set ts = ##class(%SQL.Statement).%New()
+      set sc=ts.%Prepare(sql)
+      quit:$$$ISERR(sc)
+
+      set tr = ts.%Execute(pRequest.uploadid)
+      if tr.%Next() {
+        set pResponse.recordId = tr.%ID
+      
+      } else {
+        set pResponse.recordId = -1
+      
+      }
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
+Method patientMapingCheck(pRequest As I2B2onFHIR.Messages.PatientMapingTransformResponse, Output pResponse As I2B2onFHIR.Messages.dataCheckBaseResponse)
+{
+    s sc = $$$OK
+    try {
+      set pResponse = ##class(I2B2onFHIR.Messages.dataCheckBaseResponse).%New()
+
+      set sql = "SELECT %ID FROM ""public"".""patient_mapping"" WHERE upload_id = ?"
+  
+      set ts = ##class(%SQL.Statement).%New()
+		  set sc=ts.%Prepare(sql)
+		  quit:$$$ISERR(sc)
+
+		  set tr = ts.%Execute(pRequest.uploadid)
+		  if tr.%Next() {
+        set pResponse.recordId = tr.%ID
+        
+      } else {
+        set pResponse.recordId = -1
+      
+      }
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
+Method providerDataSave(pRequest As I2B2onFHIR.Messages.providerDataTransformResponse, Output pResponse As Ens.Response)
+{
+}
+
+Method patientDimensionCheck(pRequest As I2B2onFHIR.Messages.PatientDimensionTransformResponse, Output pResponse As I2B2onFHIR.Messages.dataCheckBaseResponse)
+{
+    s sc = $$$OK
+    try {
+        set pResponse = ##class(I2B2onFHIR.Messages.dataCheckBaseResponse).%New()
+
+        ;s sql = "SELECT patient_num FROM ""public"".""patient_dimension"" WHERE upload_id = ?"
+        set sql = "SELECT %ID FROM ""public"".""patient_dimension"" WHERE upload_id = ?"
+		
+        set ts = ##class(%SQL.Statement).%New()
+		set sc=ts.%Prepare(sql)
+		quit:$$$ISERR(sc)
+
+		set tr = ts.%Execute(pRequest.uploadid)
+		if tr.%Next() {
+            set pResponse.recordId = tr.%ID
+        
+        } else {
+            set pResponse.recordId = -1
+        
+        }
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
+XData MessageMap
+{
+<MapItems>
+  <MapItem MessageType="I2B2onFHIR.Messages.VisitDimensionTransformResponse">
+    <Method>visitDimensionCheck</Method>
+  </MapItem>
+
+  <MapItem MessageType="I2B2onFHIR.Messages.EncounterMappingTransformResponse">
+    <Method>encounterMappingCheck</Method>
+  </MapItem>
+
+  <MapItem MessageType="I2B2onFHIR.Messages.PatientDimensionTransformResponse">
+    <Method>patientDimensionCheck</Method>
+  </MapItem>
+
+  <MapItem MessageType="I2B2onFHIR.Messages.PatientMapingTransformResponse">
+    <Method>patientMapingCheck</Method>
+  </MapItem>
+
+
+
+
+
+  <MapItem MessageType="I2B2onFHIR.Messages.providerDataTransformResponse">
+    <Method>providerDataSave</Method>
+  </MapItem>
+</MapItems>
+}
+
+}
