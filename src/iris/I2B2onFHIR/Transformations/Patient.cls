@@ -6,7 +6,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	s sc = $$$OK
 	try {
         set target = ##class(I2B2onFHIR.Messages.patientDataTransformResponse).%New()
-        set target.sexcd = source.json."gender"
+        set target.sexcd = ..SexCD(source.json) //source.json."gender"
         set target.patientnum = ..PatientNum(source.json) ;source.json
         set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
@@ -100,6 +100,12 @@ ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
 {
 	// генерим автоматически, произвольный номер
 	Q $tr($now(),".,")
+}
+
+ClassMethod SexCD(json As %DynamicObject) As %String [ Private ]
+{
+	set sex = json."gender"
+	Q $select(sex = "Female":"F", sex = "Male":"M", 1:"")
 }
 
 ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
