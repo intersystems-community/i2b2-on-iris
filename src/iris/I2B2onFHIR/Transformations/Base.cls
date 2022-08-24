@@ -31,7 +31,7 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "") As %
   
 	set ts = ##class(%SQL.Statement).%New()
 	set sc = ts.%Prepare(sql)
-	quit:$$$ISERR(sc)
+	quit:$$$ISERR(sc) ret
 
 	set tr = ts.%Execute(resourceName, FHIRID)
 	if tr.%Next() {
@@ -43,11 +43,11 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "") As %
 		
 		set rs=##class(%ResultSet).%New()
 		Set sc=rs.Prepare(sql)
-		quit:$$$ISERR(sc)
+		quit:$$$ISERR(sc) ret
 
 		set i2b2Id = $i(^Ids(resourceName))
 		set sc=rs.Execute(resourceName, FHIRID, i2b2Id)
-		quit:$$$ISERR(sc)
+		quit:$$$ISERR(sc) ret
 
 		set ret = i2b2Id
 
@@ -92,3 +92,4 @@ ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 }
 
 }
+
