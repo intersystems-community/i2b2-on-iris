@@ -10,6 +10,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
     set sc = $$$OK
     try {
 		// encounter_mapping
+		$$$TRACE("Create encounter_mapping table")
 		// 1 - transform data
 		#dim encounterMappingTransformResponse As I2B2onFHIR.Messages.EncounterMappingTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.EncounterMapping).Transform(pRequest, .encounterMappingTransformResponse)
@@ -31,6 +32,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 
 
 		// visit_dimension
+		$$$TRACE("Create visit_dimension table")
 		// 1 - transform data
 		#dim visitDimensionTransformResponse As I2B2onFHIR.Messages.VisitDimensionTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.VisitDimension).Transform(pRequest, .visitDimensionTransformResponse)

@@ -7,7 +7,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	try {
         set target = ##class(I2B2onFHIR.Messages.PatientDimensionTransformResponse).%New()
         set target.sexcd = ..SexCD(source.json) //source.json."gender"
-        set target.patientnum = ..PatientNum(source.json) ;source.json
+        set target.patientnum ="" //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
         set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
         set target.deathdate =  source.json."deceasedDateTime"
@@ -50,6 +50,8 @@ ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 	S birthday = json."birthDate"
 	S birthday=$tr(birthday,"-/ ")
 	// нужно брать не "сейчас", а дату study date/first visit
+	//calculate from study date/first visit: 
+	//start_date.visit_dimension - Patient_dimension.birth_date
 	S now=$zdt(+$h,8)
 	Q (now-birthday)\10000
 }
@@ -64,4 +66,3 @@ ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
 }
 
 }
-
