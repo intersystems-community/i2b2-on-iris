@@ -66,4 +66,3 @@ ClassMethod NameChar(json As %DynamicObject) As %Library.String
 }
 
 }
-

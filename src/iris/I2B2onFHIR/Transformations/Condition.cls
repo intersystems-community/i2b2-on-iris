@@ -14,4 +14,3 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 }
 
 }
-

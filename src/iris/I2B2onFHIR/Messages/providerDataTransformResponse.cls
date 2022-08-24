@@ -1,6 +1,7 @@
 Class I2B2onFHIR.Messages.providerDataTransformResponse Extends Ens.Response
 {
 
+/// ??? UNUSED ???
 Property providerid As %Library.String(MAXLEN = 50) [ Required, SqlColumnNumber = 2, SqlFieldName = provider_id ];
 
 Property providerpath As %Library.String(MAXLEN = 700) [ Required, SqlColumnNumber = 3, SqlFieldName = provider_path ];

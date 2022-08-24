@@ -27,6 +27,15 @@ XData ProductionDefinition
     <Setting Target="Adapter" Name="DSN">Userunixodbc</Setting>
     <Setting Target="Adapter" Name="Credentials"></Setting>
   </Item>
+  <Item Name="Processes.Patient" Category="" ClassName="I2B2onFHIR.Processes.Patient" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="Processes.Encounter" Category="" ClassName="I2B2onFHIR.Processes.Encounter" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="Processes.Practitioner" Category="" ClassName="I2B2onFHIR.Processes.Practitioner" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  </Item>
+  <Item Name="Operations.CheckDataInI2B2" Category="" ClassName="I2B2onFHIR.Operations.CheckDataInI2B2" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+    <Setting Target="Host" Name="ArchiveIO">1</Setting>
+  </Item>
 </Production>
 }
 

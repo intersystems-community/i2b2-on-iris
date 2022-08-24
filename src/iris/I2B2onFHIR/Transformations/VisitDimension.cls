@@ -59,4 +59,3 @@ ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
 }
 
 }
-

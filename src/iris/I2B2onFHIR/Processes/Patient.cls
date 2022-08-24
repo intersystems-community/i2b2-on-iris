@@ -10,6 +10,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
     set sc = $$$OK
 	try {
 		// patient mapping
+		$$$TRACE("Create patient_mapping table")
 		// 1 - transform data
 		#dim patientMappingTransformResponse As I2B2onFHIR.Messages.PatientMapingTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.PatientMaping).Transform(pRequest, .patientMappingTransformResponse)
@@ -30,6 +31,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 
 		
 		// patient dimension
+		$$$TRACE("Create patient_dimension table")
 		// 1 - transform data
 		#dim patientDimensionTransformResponse As I2B2onFHIR.Messages.PatientDimensionTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.PatientDimension).Transform(pRequest, .patientDimensionTransformResponse)
@@ -46,7 +48,6 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 		}
 
 		
-		$$$TRACE("Patient")
 	} catch e {
 		s sc = e.AsStatus()
 	}
