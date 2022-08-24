@@ -30,12 +30,18 @@ ClassMethod SourceSystemCD(json As %DynamicObject) As %String [ Private ]
 	Q "Test"
 }
 
+ClassMethod IdeSource() As %String [ Private ]
+{
+	//Demo in IRIS. we can put "Test"
+	Q "care evolution"
+}
+
 ClassMethod DownloadDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
 {
 	Q ""
 }
 
-ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
+ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 {
 	// генерим автоматически, произвольный номер
 	Q $tr($now(),".,")

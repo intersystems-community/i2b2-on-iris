@@ -6,19 +6,19 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	s sc = $$$OK
 	try {
         set target = ##class(I2B2onFHIR.Messages.EncounterMappingTransformResponse).%New()
-        set target.downloaddate=""
-        set target.encounteride=""
-        set target.encounteridesource=""
-        set target.encounteridestatus=""
-        set target.encounternum=""
-        set target.importdate=""
-        set target.patientide=""
-        set target.patientidesource=""
-        set target.projectid=""
-        set target.sourcesystemcd=""
-        set target.updatedate=""
-        set target.uploaddate=""
-        set target.uploadid=""
+        set target.downloaddate=..CurrentDT()
+        set target.encounteride=source.json."ID"
+        set target.encounteridesource=..IdeSource()
+        set target.encounteridestatus="A"
+        set target.encounternum=..GenerateNum(source.json)
+        set target.importdate=..CurrentDT()
+        set target.patientide=""		//patient_mapping.patient_ide
+        set target.patientidesource=""	//patient_mapping.patient_ide_source
+        set target.projectid=""			//PM_PROJECT_DATA.project_id  //???
+        set target.sourcesystemcd=..SourceSystemCD(source.json)
+        set target.updatedate=..CurrentDT()  //??? //записываем даты обновлений
+        set target.uploaddate=..CurrentDT()
+        set target.uploadid=..UploadId(source.json)
 
 	} catch e {
 		s sc = e.AsStatus()
