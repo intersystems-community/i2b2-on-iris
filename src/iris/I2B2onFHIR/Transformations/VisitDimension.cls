@@ -8,14 +8,16 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.VisitDimensionTransformResponse).%New()
         set target.activestatuscd= ..ActiveStatusCD(source.json)
         set target.downloaddate=..CurrentDT()
-        set target.encounternum="" //encounter_mapping.encounter_num //..PatientNum(source.json)
+        set target.encounternum=..getI2B2ID("encounter", source.json."ID") //encounter_mapping.encounter_num 
         set target.enddate=source.json.period.end
         set target.importdate=..CurrentDT()
         set target.inoutcd=..InoutCD(source.json)
         set target.lengthofstay=..LengthOfStay(source.json)
         set target.locationcd=source.json.location.location.display
         set target.locationpath=""
-        set target.patientnum="" //patient_mapping.patient_num //..PatientNum(source.json)
+        set refType = $p(source.json."subject"."reference", "/", 1)
+        set refId = $p(source.json."subject"."reference", "/", 2)
+        set target.patientnum=..getI2B2ID(refType, refId) //patient_mapping.patient_num 
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.startdate=source.json.period.start
         set target.updatedate=..CurrentDT()
@@ -59,3 +61,4 @@ ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
 }
 
 }
+

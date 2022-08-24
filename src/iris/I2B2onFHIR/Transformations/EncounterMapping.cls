@@ -10,7 +10,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.encounteride=source.json."ID"
         set target.encounteridesource=..IdeSource()
         set target.encounteridestatus="A"
-        set target.encounternum=..GenerateNum(source.json)
+        set target.encounternum=..getI2B2ID("encounter", source.json."ID") //..GenerateNum(source.json)
         set target.importdate=..CurrentDT()
         set target.patientide=""		//patient_mapping.patient_ide
         set target.patientidesource=""	//patient_mapping.patient_ide_source
@@ -27,3 +27,4 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 }
 
 }
+
