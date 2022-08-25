@@ -7,7 +7,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	try {
         set target = ##class(I2B2onFHIR.Messages.PatientDimensionTransformResponse).%New()
         set target.sexcd = ..SexCD(source.json) //source.json."gender"
-        set target.patientnum ="" //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
+        set target.patientnum =..getI2B2ID("patient", source.json."ID") //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
         set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
         set target.deathdate =  source.json."deceasedDateTime"
@@ -66,3 +66,4 @@ ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
 }
 
 }
+

@@ -11,7 +11,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.patientide=source.json."ID"
         set target.patientidesource=..IdeSource()
         set target.patientidestatus=source.json."deceasedBoolean"."ID"
-        set target.patientnum=..GenerateNum(source.json)
+        set target.patientnum=..getI2B2ID("patient", source.json."ID") //..GenerateNum(source.json)
         set target.projectid=""
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
@@ -25,3 +25,4 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 }
 
 }
+
