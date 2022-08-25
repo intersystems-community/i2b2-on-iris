@@ -16,7 +16,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()
-        set target.uploadid=..UploadId(source.json)
+        set target.uploadid= ..getI2B2ID("patient", source.json."ID") //..UploadId(source.json)
 
 	} catch e {
 		s sc = e.AsStatus()
