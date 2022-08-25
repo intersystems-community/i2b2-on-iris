@@ -21,7 +21,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.startdate=source.json.period.start
         set target.updatedate=..CurrentDT()
-        set target.uploadid= ..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
+        set target.uploadid= ..getI2B2ID("encounter", source.json."ID") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
         set target.visitblob=""
 	} catch e {
 		s sc = e.AsStatus()
