@@ -13,6 +13,8 @@ Parameter TARGETENCOUNTER = "Processes.Encounter";
 
 Parameter TARGETPRACTITIONER = "Processes.Practitioner";
 
+Parameter TARGETOBSERVATIONFACT = "Process.ObservationFact";
+
 Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Response) As %Status
 {
     s sc = $$$OK
@@ -57,6 +59,7 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
             set tr = ts.%Execute(resourceType, json)
         }
 
+        set patientsList = ""
         // 2 process records in particular order
         for dataType = "patient", "encounter", "practitioner", "observation_fact" {
             
@@ -73,13 +76,17 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 $$$TRACE(dataType_"|"_$e(tr2.content,1,100))
 
                 /// process data
-                /// ToDo - check if parent exists
                 set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
                 set transformRequest.json = jsonObj
 
                 /// process data
-                /// ToDo - check if parent exists            
-                s sc = ..SendRequestSync(target, transformRequest, .patientCreateResponse)
+                #dim dataCreateResponse As I2B2onFHIR.Messages.dataCreateResponse
+                s sc = ..SendRequestSync(target, transformRequest, .dataCreateResponse)
+
+                if dataCreateResponse.patientNum'="" {
+                    set patientsList(dataCreateResponse.patientNum) = ""
+                }
+                
                 /// ??? delete record from data table anyway
                 ///continue:$$$ISERR(sc)
                 do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
@@ -87,11 +94,15 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
             }
         }
 
-
-
-
-
+        #dim observationFactRequest As I2B2onFHIR.Messages.ObservationFactBPRequest
+        // create/update observation fact
+        set patientNum="" for { set patientNum = $o(patientsList(patientNum)) quit:patientNum=""
+            set observationFactRequest = ##class(I2B2onFHIR.Messages.ObservationFactBPRequest).%New()
+            set observationFactRequest.patientNum = patientNum
             
+            s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactRequest, .observationFactResponse)
+            quit:$$$ISERR(sc)
+        }
 
 	} catch e {
 		s sc = e.AsStatus()
