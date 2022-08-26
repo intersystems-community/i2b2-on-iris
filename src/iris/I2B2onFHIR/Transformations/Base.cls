@@ -1,7 +1,8 @@
 Class I2B2onFHIR.Transformations.Base Extends Ens.DataTransform
 {
 
-ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As Ens.Response) As %Status
+/// ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As Ens.Response) As %Status
+ClassMethod Transform(source As Ens.Request, target As Ens.Response) As %Status
 {
 	s sc = $$$OK
 	try {
@@ -18,42 +19,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 /// this may be used to find an existing parent record and get some date from it
 ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "") As %String
 {
-	quit:resourceName="" ""
-	quit:FHIRID="" ""
-
-	set resourceName = $ZCVT(resourceName,"L")
-	set FHIRID = $ZCVT(FHIRID,"L")
-
-	set ret = ""
-
-	// check if record already exists
-	set sql = "SELECT %ID FROM public_storage.Ids WHERE resourceName = ? AND fhirId = ?"
-  
-	set ts = ##class(%SQL.Statement).%New()
-	set sc = ts.%Prepare(sql)
-	quit:$$$ISERR(sc) ret
-
-	set tr = ts.%Execute(resourceName, FHIRID)
-	if tr.%Next() {
-		set ret = tr.%ID
-	
-	} else {
-		// new record
-        s sql = "INSERT INTO public_storage.Ids (resourceName, fhirId, birth_date, i2b2Id) VALUES (?,?,?)"
-		
-		set rs=##class(%ResultSet).%New()
-		Set sc=rs.Prepare(sql)
-		quit:$$$ISERR(sc) ret
-
-		set i2b2Id = $i(^Ids(resourceName))
-		set sc=rs.Execute(resourceName, FHIRID, i2b2Id)
-		quit:$$$ISERR(sc) ret
-
-		set ret = i2b2Id
-
-	}
-
-	q ret
+	quit ##class(I2B2onFHIR.Utils.Main).getI2B2ID(resourceName, FHIRID)
 }
 
 ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
@@ -92,4 +58,3 @@ ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 }
 
 }
-
