@@ -22,6 +22,7 @@ Method GetProxyVersionClass(pResourceType As %String) As %String
 	q ..GetProxyClass(pResourceType)  // no version
 }
 
+/// @Override
 /// @API
 /// Returns the classname of the persistent object used store resources for the specified type
 Method GetResourceClass(resourceType As %String) As %String [ CodeMode = expression ]
