@@ -57,7 +57,7 @@ ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 	Q $tr($now(),".,")
 }
 
-ClassMethod OpenPatienDimention(patientnum)
+ClassMethod ExecQuery(patientnum) As %Status
 {
 	s sc = $$$OK
     try {
