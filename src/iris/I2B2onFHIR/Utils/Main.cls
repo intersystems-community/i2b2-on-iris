@@ -53,4 +53,32 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", sear
 	q ret
 }
 
+/// Select from Table and return ID for Field with Value
+ClassMethod getIDfromTable(Table As %String = "", Field As %String = "", Value As %String = "", Output ID As %String) As %Status
+{
+	set ID = -1
+	if Table = "" Q $$$ERROR("Empty Table name")
+	if Field = "" Q $$$ERROR("Empty Field name")
+	if Value = "" Q $$$ERROR("Empty Value")
+	set sc = $$$OK
+	set ID = -1
+    try {
+      set sql = "SELECT %ID FROM "_Table_" WHERE "_Field_" = ?"
+      
+      set ts = ##class(%SQL.Statement).%New()
+      set sc=ts.%Prepare(sql)
+      quit:$$$ISERR(sc)
+
+      set tr = ts.%Execute(Value)
+      if tr.%Next() {
+        set ID = tr.%ID
+      } 
+ 	} 
+	catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
 }
+
+}
+

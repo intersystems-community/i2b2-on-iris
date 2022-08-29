@@ -58,3 +58,4 @@ ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 }
 
 }
+
