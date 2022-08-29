@@ -5,6 +5,41 @@ Parameter ADAPTER = "EnsLib.SQL.OutboundAdapter";
 
 Parameter INVOCATION = "Queue";
 
+Method observationFactSave(pRequest As I2B2onFHIR.Messages.ObservationFactTransformResponse, Output pResponse As Ens.Response)
+{
+    s sc = $$$OK
+    try {
+      #dim rs As EnsLib.SQL.GatewayResultSet
+
+      #dim record As I2B2onFHIR.Messages.ObservationFactItem
+
+      s sql = "INSERT INTO ""public"".""observation_fact"" (encounter_num, patient_num, concept_cd, provider_id, start_date, "_
+                  "modifier_cd, instance_num, valtype_cd, tval_char, nval_num, valueflag_cd, quantity_num, "_
+                  "units_cd, end_date, location_cd, observation_blob, confidence_num, update_date, download_date, "_
+                  "import_date, sourcesystem_cd, upload_id, text_search_index) "_
+              "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+		
+      set rs=##class(%ResultSet).%New()
+		  Set sc=rs.Prepare(sql)
+		  quit:$$$ISERR(sc)
+
+      for elemNum = 1:1:pRequest.data.Count() {
+        set record = pRequest.data.GetAt(elemNum)
+
+          set sc=rs.Execute(record.encounternum, record.patientnum, record.conceptcd, record.providerid, record.startdate,
+                            record.modifiercd, record.instancenum, record.valtype, record.tvalchar, record.nvalnum, record.valtypecd, record.quantitynum,
+                            record.unitscd, record.enddate, record.locationcd, record.observationblob, record.confidencenum, record.updatedate, record.downloaddate,
+                            record.importdate, record.sourcesystemcd, record.uploadid, record.textsearchindex)
+          quit:$$$ISERR(sc)
+
+      }
+
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
+}
+
 Method providerDimensionSave(pRequest As I2B2onFHIR.Messages.ProviderDimensionTransformResponse, Output pResponse As Ens.Response)
 {
     s sc = $$$OK
@@ -145,6 +180,10 @@ Method patientDataSave(pRequest As I2B2onFHIR.Messages.PatientDimensionTransform
 XData MessageMap
 {
 <MapItems>
+  <MapItem MessageType="I2B2onFHIR.Messages.ObservationFactTransformResponse">
+    <Method>observationFactSave</Method>
+  </MapItem>
+
   <MapItem MessageType="I2B2onFHIR.Messages.ProviderDimensionTransformResponse">
     <Method>providerDimensionSave</Method>
   </MapItem>
