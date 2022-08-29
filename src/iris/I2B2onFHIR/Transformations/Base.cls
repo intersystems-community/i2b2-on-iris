@@ -57,4 +57,29 @@ ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 	Q $tr($now(),".,")
 }
 
+ClassMethod OpenPatienDimention(patientnum)
+{
+	s sc = $$$OK
+    try {
+      set sql = "SELECT %ID FROM ""public"".""patient_dimension"" WHERE patient_num = ?"
+  
+      set ts = ##class(%SQL.Statement).%New()
+      set sc=ts.%Prepare(sql)
+      quit:$$$ISERR(sc)
+
+      set tr = ts.%Execute(patientnum)
+      if tr.%Next() {
+        set pResponse.recordId = tr.%ID
+      
+      } else {
+        set pResponse.recordId = -1
+      
+      }
+	} catch e {
+		s sc = e.AsStatus()
+	}
+	q sc
 }
+
+}
+
