@@ -5,7 +5,6 @@ Parameter StrategyKey As %String = "I2B2Json";
 
 Parameter InteractionsClass As %String = "I2B2.HS.FHIRServer.Storage.Json.Interactions";
 
-/// @API
 /// Returns the classname of the persistent object used store resources for the specified type
 Method GetProxyClass(pResourceType As %String) As %String
 {
