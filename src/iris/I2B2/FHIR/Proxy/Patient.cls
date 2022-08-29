@@ -13,6 +13,12 @@ Property LName As %String(MAXLEN = "");
 
 Property FName As %String(MAXLEN = "");
 
+Property Key As %String(MAXLEN = "") [ Calculated, SqlComputeCode = {Set {*} = "Patient/"_{PatientId}}, SqlComputed ];
+
+Property ResourceType As %String(COLLATION = "") [ InitialExpression = "Patient" ];
+
+Property ResourceId As %String(MAXLEN = "") [ Calculated, SqlComputeCode = {Set {*} = {PatientId}}, SqlComputed ];
+
 /// Check if resource exists
 /// rsrcKey = $$$BuildRsrcKey(pResourceType, pResourceId), for example: "Patient/123"
 ClassMethod KeyIdxExists(rsrcKey As %String) As %Boolean
@@ -25,6 +31,7 @@ ClassMethod KeyIdxExists(rsrcKey As %String) As %Boolean
 /// rsrcKey = $$$BuildRsrcKey(pResourceType, pResourceId), for example: "Patient/123"
 ClassMethod KeyIdxOpen(rsrcKey As %String, empty, tSC As %Status) As I2B2.FHIR.Proxy.Base
 {
+	s tSC=$$$OK
 	s pResourceType = $p(rsrcKey, "/")
 	s (patientId, pResourceId) = $p(rsrcKey, "/", 2)
 
