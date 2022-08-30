@@ -13,7 +13,7 @@ Parameter TARGETENCOUNTER = "Processes.Encounter";
 
 Parameter TARGETPRACTITIONER = "Processes.Practitioner";
 
-Parameter TARGETOBSERVATIONFACT = "Process.ObservationFact";
+Parameter TARGETOBSERVATIONFACT = "Processes.ObservationFact";
 
 Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Response) As %Status
 {
@@ -83,7 +83,9 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 /// process data
                 #dim dataCreateResponse As I2B2onFHIR.Messages.dataCreateResponse
                 s sc = ..SendRequestSync(target, transformRequest, .dataCreateResponse)
-
+                
+                continue:$$$ISERR(sc)
+                
                 if dataCreateResponse.patientNum'="" {
                     set patientsList(dataCreateResponse.patientNum) = ""
                 }

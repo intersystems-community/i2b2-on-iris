@@ -4,41 +4,42 @@ Class I2B2onFHIR.Transformations.ObservationFact Extends I2B2onFHIR.Transformati
 ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
 {
 	s sc = $$$OK
-	
-	set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visitdimension""", "patient_num", source.patientNum, .ID)
-	if $$$ISERR(sc) Q sc
-	#dim counter as public.visitdimension = $$$NULLOREF
-	if ID > 0 {
-		set counter = ##class(public.visitdimension).%OpenId(ID)
-	}
-	
-	set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientdimension""", "patient_num", source.patientNum, .ID)
-	if $$$ISERR(sc) Q sc
-	#dim patient as public.patientdimension = $$$NULLOREF
-	if ID > 0 {
-		set patient = ##class(public.patientdimension).%OpenId(ID)
-	}
-	
-	#dim provider as public.providerdimension = $$$NULLOREF
-	if $IsObject(counter) {
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""providerdimension""", "uploadid", counter.uploadid, .ID)
-	}
-	if $$$ISERR(sc) Q sc
-	if ID > 0 {
-		set provider = ##class(public.providerdimension).%OpenId(ID)
-	}	
-	
-	#dim concept as public.conceptdimension = $$$NULLOREF
-	if $IsObject(counter) {
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""conceptdimension""", "uploadid", counter.uploadid, .ID)
-	}
-	if $$$ISERR(sc) Q sc
-	if ID > 0 {
-		set concept = ##class(public.conceptdimension).%OpenId(ID)
-	}	
-	
 	try {
-        set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()
+        set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()	
+	
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visitdimension""", "patient_num", source.patientNum, .ID)
+		if $$$ISERR(sc)
+		#dim counter as public.visitdimension = $$$NULLOREF
+		if ID > 0 {
+			set counter = ##class(public.visitdimension).%OpenId(ID)
+		}
+		
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientdimension""", "patient_num", source.patientNum, .ID)
+		if $$$ISERR(sc)
+		#dim patient as public.patientdimension = $$$NULLOREF
+		if ID > 0 {
+			set patient = ##class(public.patientdimension).%OpenId(ID)
+		}
+		
+		#dim provider as public.providerdimension = $$$NULLOREF
+		if $IsObject(counter) {
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""providerdimension""", "uploadid", counter.uploadid, .ID)
+		}
+		if $$$ISERR(sc)
+		if ID > 0 {
+			set provider = ##class(public.providerdimension).%OpenId(ID)
+		}	
+		
+		#dim concept as public.conceptdimension = $$$NULLOREF
+		if $IsObject(counter) {
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""conceptdimension""", "uploadid", counter.uploadid, .ID)
+		}
+		if $$$ISERR(sc)
+		if ID > 0 {
+			set concept = ##class(public.conceptdimension).%OpenId(ID)
+		}	
+	
+
 
 		For Method = "AGE","DATEB","DATED","LANGUAGE","MARITAL","RACE","RELIGION","SEX","VITAL" {
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
