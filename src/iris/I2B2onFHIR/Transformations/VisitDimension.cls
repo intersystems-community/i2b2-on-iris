@@ -57,11 +57,14 @@ ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]
 
 ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
 {
+	q ..Lookup("lookup.visitdimention.inout",json.status,"")
+	/*
 	I json.classHistory.class="inpatient" Q "IP"
 	I json.classHistory.class="outpatient" Q "OP"
 	I json.classHistory.class="ambulatory" Q "AV"
 	I json.classHistory.class="emergency" Q "ED"
 	Q ""
+	*/
 }
 
 }
