@@ -18,7 +18,7 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", sear
 	set ret = ""
 
 	// check if record already exists
-	set sql = "SELECT %ID FROM public_storage.Ids WHERE resourceName = ? AND fhirId = ?"
+	set sql = "SELECT i2b2Id FROM I2B2onFHIR_storage.Ids WHERE resourceName = ? AND fhirId = ?"
   
 	set ts = ##class(%SQL.Statement).%New()
 	set sc = ts.%Prepare(sql)
@@ -26,12 +26,12 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", sear
 
 	set tr = ts.%Execute(resourceName, FHIRID)
 	if tr.%Next() {
-		set ret = tr.%ID
+		set ret = tr.i2b2Id
 	
 	} else {
         if searchFlag = 0 {
             // new record
-            s sql = "INSERT INTO public_storage.Ids (resourceName, fhirId, birth_date, i2b2Id) VALUES (?,?,?)"
+            s sql = "INSERT INTO I2B2onFHIR_storage.Ids (resourceName, fhirId, i2b2Id) VALUES (?,?,?)"
             
             set rs=##class(%ResultSet).%New()
             Set sc=rs.Prepare(sql)
