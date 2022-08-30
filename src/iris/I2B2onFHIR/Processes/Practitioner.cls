@@ -15,7 +15,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 		$$$TRACE("Create provider_dimension table")
 		// 1 - transform data
 		#dim providerDimensionTransformResponse As I2B2onFHIR.Messages.ProviderDimensionTransformResponse
-		set sc = ##class(I2B2onFHIR.Transformations.PatientMaping).Transform(pRequest, .providerDimensionTransformResponse)
+		set sc = ##class(I2B2onFHIR.Transformations.ProviderDimension).Transform(pRequest, .providerDimensionTransformResponse)
 		quit:$$$ISERR(sc)
 
 
@@ -41,3 +41,4 @@ Storage Default
 }
 
 }
+

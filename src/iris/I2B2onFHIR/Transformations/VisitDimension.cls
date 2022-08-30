@@ -31,8 +31,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 
 ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 {
-	// переделать на Lookup
-	//q ..Lookup("public.codelookup",)
+	// переделал на Lookup
+	q ..Lookup("lookup.visitdimention.activestatus",json.status,"NULL",2)
+	/*
 	I json.status="planned" Q "PRELIMINARY"
 	I json.status="arrived" Q "ACTIVE"
 	I json.status="triaged" Q "ACTIVE"
@@ -43,6 +44,7 @@ ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 	I json.status="entered-in-error" Q "NULL"
 	I json.status="unknown" Q "NULL"
 	Q "NULL"
+	*/
 }
 
 ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]

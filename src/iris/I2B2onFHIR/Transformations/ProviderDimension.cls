@@ -1,11 +1,11 @@
-Class I2B2onFHIR.Transformations.Practitioner Extends I2B2onFHIR.Transformations.Base
+Class I2B2onFHIR.Transformations.ProviderDimension Extends I2B2onFHIR.Transformations.Base
 {
 
-ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.practitionerDataTransformResponse) As %Status
+ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ProviderDimensionTransformResponse) As %Status
 {
 	s sc = $$$OK
 	try {
-        set target = ##class(I2B2onFHIR.Messages.practitionerDataTransformResponse).%New()
+        set target = ##class(I2B2onFHIR.Messages.ProviderDimensionTransformResponse).%New()
         set target.downloaddate=..CurrentDT()
         set target.importdate=..CurrentDT()
         set target.namechar=..NameChar(source.json)
@@ -66,3 +66,4 @@ ClassMethod NameChar(json As %DynamicObject) As %Library.String
 }
 
 }
+

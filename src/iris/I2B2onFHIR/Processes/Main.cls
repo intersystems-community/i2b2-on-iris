@@ -28,7 +28,8 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
         set jsonObj = {}.%FromJSON(json)
 
         ; check resource type
-        set resourceType = jsonObj."resource"."resourceType"
+        ;set resourceType = jsonObj."resource"."resourceType"
+        set resourceType = jsonObj."resourceType"
 
         set resourceType = $ZCVT(resourceType,"L")
 
@@ -116,3 +117,4 @@ Storage Default
 }
 
 }
+
