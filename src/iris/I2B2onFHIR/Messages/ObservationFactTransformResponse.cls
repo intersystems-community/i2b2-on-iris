@@ -1,4 +1,5 @@
-Class I2B2onFHIR.Messages.ObservationFactTransformResponse Extends Ens.Response
+/// fixed       Extends Ens.Response -> Extends Ens.Request
+Class I2B2onFHIR.Messages.ObservationFactTransformResponse Extends Ens.Request
 {
 
 Property data As list Of I2B2onFHIR.Messages.ObservationFactItem;

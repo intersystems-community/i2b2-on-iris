@@ -1,4 +1,5 @@
-Class I2B2onFHIR.Messages.EncounterMappingTransformResponse Extends Ens.Response
+/// fixed       Extends Ens.Response -> Extends Ens.Request
+Class I2B2onFHIR.Messages.EncounterMappingTransformResponse Extends Ens.Request
 {
 
 Property encounteride As %Library.String(MAXLEN = 200) [ Required, SqlColumnNumber = 2, SqlFieldName = encounter_ide ];
