@@ -1,4 +1,5 @@
-Class I2B2onFHIR.Messages.PatientDimensionTransformResponse Extends Ens.Response
+/// fixed       Extends Ens.Response -> Extends Ens.Request
+Class I2B2onFHIR.Messages.PatientDimensionTransformResponse Extends Ens.Request
 {
 
 Property patientnum As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648) [ Required, SqlColumnNumber = 2, SqlFieldName = patient_num ];

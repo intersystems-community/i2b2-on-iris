@@ -1,4 +1,5 @@
-Class I2B2onFHIR.Messages.PatientMapingTransformResponse Extends Ens.Response
+/// error fixed         Extends Ens.Response -> Extends Ens.Request
+Class I2B2onFHIR.Messages.PatientMapingTransformResponse Extends Ens.Request
 {
 
 Property patientide As %Library.String(MAXLEN = 200) [ Required, SqlColumnNumber = 2, SqlFieldName = patient_ide ];
