@@ -13,7 +13,7 @@ Parameter TARGETENCOUNTER = "Processes.Encounter";
 
 Parameter TARGETPRACTITIONER = "Processes.Practitioner";
 
-Parameter TARGETOBSERVATIONFACT = "Process.ObservationFact";
+Parameter TARGETOBSERVATIONFACT = "Processes.ObservationFact";
 
 Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Response) As %Status
 {
