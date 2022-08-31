@@ -5,11 +5,13 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 {
 	s sc = $$$OK
 	try {
-		
-		set ref = source.json.subject.reference
-		if $zcvt($P(ref,"/"),"L")'="patient" s sc=$$$ERROR("No patient reference") Q
-		set patRef=$P(ref,"/",2)
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientmapping""", "upload_id", patRef, .ID)
+		 
+
+		set refType = $p(source.json."subject"."reference", "/", 1)
+        set refId = $p(source.json."subject"."reference", "/", 2)
+        set patientnum=..getI2B2ID(refType, refId) //patient_mapping.patient_num
+
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientmapping""", "patient_num", patientnum, .ID)
 		if $$$ISERR(sc) Q
 		#dim patient as public.patientmapping = $$$NULLOREF
 		if ID > 0 {
@@ -32,7 +34,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()  //??? //записываем даты обновлений
         set target.uploaddate=..CurrentDT()
         //Index encountermappingpk On (encounteride, encounteridesource, projectid, patientide, patientidesource) [ PrimaryKey, SqlName = encounter_mapping_pk, Type = index, Unique ];
-        set target.encounternum=..getI2B2ID("encounter", source.json.id,$lb(target.encounteride, target.encounteridesource, target.projectid, target.patientide, target.patientidesource)) //..GenerateNum(source.json)
+        set target.encounternum=##class(I2B2onFHIR.Utils.Main).getI2B2ID("encounter", source.json.id,1) //..GenerateNum(source.json)
         set target.uploadid = target.encounternum //..getI2B2ID("encounter", source.json.id) //..UploadId(source.json)
         
 

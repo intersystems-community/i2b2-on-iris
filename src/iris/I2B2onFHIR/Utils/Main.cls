@@ -51,8 +51,11 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", sear
             quit:$$$ISERR(sc) ret
 
             set i2b2Id = $i(^Ids(resourceName))
-			if i2b2Link="" {
+			/*if i2b2Link="" {
 				set i2b2Link = $lb(i2b2Id)
+			}*/
+			if ",patient,encounter,"[(","_resourceName_",") {
+				set i2b2Link = $lb(i2b2Id)_i2b2Link
 			}
             set sc=rs.Execute(resourceName, FHIRID, i2b2Id, i2b2Link)
             quit:$$$ISERR(sc) ret
@@ -97,3 +100,4 @@ ClassMethod getIDfromTable(Table As %String = "", Field As %String = "", Value A
 }
 
 }
+

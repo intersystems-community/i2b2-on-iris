@@ -11,7 +11,6 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.patientide=source.json."id"
         set target.patientidesource=..IdeSource()
         set target.patientidestatus=source.json."_deceasedBoolean"."id"
-        set target.patientnum=..getI2B2ID("patient", source.json."id") //..GenerateNum(source.json)
         set target.projectid="TEST"
         if ..ProjectID(.projectid) {
 	        set target.projectid=projectid
@@ -19,7 +18,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()
-        set target.uploadid= ..getI2B2ID("patient", source.json."id") //..UploadId(source.json)
+        //Index patientmappingpk On (patientide, patientidesource, projectid) [ PrimaryKey, SqlName = patient_mapping_pk, Type = index, Unique ];
+        set target.patientnum = ..getI2B2ID("patient", source.json."id",$lb(target.patientide, target.patientidesource, target.projectid)) //..UploadId(source.json)
+        set target.uploadid = target.patientnum
 
 	} catch e {
 		s sc = e.AsStatus()

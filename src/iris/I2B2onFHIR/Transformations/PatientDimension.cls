@@ -25,6 +25,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
         
+        //Index patientdimensionpk On patientnum [ PrimaryKey, SqlName = patient_dimension_pk, Type = index, Unique ];
         set target.uploadid = ..getI2B2ID("patient", source.json.id) //..UploadId(source.json)
         set target.patientnum = target.uploadid
 
