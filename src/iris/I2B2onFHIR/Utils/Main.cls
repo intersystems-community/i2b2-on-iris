@@ -1,13 +1,26 @@
 Class I2B2onFHIR.Utils.Main
 {
 
+/// w ##class(I2B2onFHIR.Utils.Main).testGetI2B2ID()
+/// test method
+ClassMethod testGetI2B2ID(resourceName As %String = "", FHIRID As %String = "", searchFlag = 0, i2b2Link) As %String
+{
+	s cls = ##class(I2B2onFHIR.Storage.Ids).%OpenId(2)
+	s lb = cls.i2b2Link
+	w $lg(lb,1),!
+	w $lg(lb,2),!
+	w $lg(lb,3),!
+}
+
 /// 20220824 Denis Bulashev
 /// returns new ID for I2B2 record based on FHIR resource name and resource ID
 /// in case if record already exists - returns an ID which was generated before
 /// this may be used to find an existing parent record and get some date from it
 /// 
 /// searchFlag [0/1] - if 1 - doesn't create a new record in the table and return empty string
-ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", searchFlag = 0) As %String
+/// 
+/// w ##class(I2B2onFHIR.Utils.Main).getI2B2ID(1,2,0,$lb(1,2,3))
+ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", searchFlag = 0, i2b2Link) As %String
 {
 	quit:resourceName="" ""
 	quit:FHIRID="" ""
@@ -31,14 +44,14 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", sear
 	} else {
         if searchFlag = 0 {
             // new record
-            s sql = "INSERT INTO I2B2onFHIR_storage.Ids (resourceName, fhirId, i2b2Id) VALUES (?,?,?)"
+            s sql = "INSERT INTO I2B2onFHIR_storage.Ids (resourceName, fhirId, i2b2Id, i2b2Link) VALUES (?,?,?,?)"
             
             set rs=##class(%ResultSet).%New()
             Set sc=rs.Prepare(sql)
             quit:$$$ISERR(sc) ret
 
             set i2b2Id = $i(^Ids(resourceName))
-            set sc=rs.Execute(resourceName, FHIRID, i2b2Id)
+            set sc=rs.Execute(resourceName, FHIRID, i2b2Id, i2b2Link)
             quit:$$$ISERR(sc) ret
 
             set ret = i2b2Id
@@ -81,4 +94,3 @@ ClassMethod getIDfromTable(Table As %String = "", Field As %String = "", Value A
 }
 
 }
-
