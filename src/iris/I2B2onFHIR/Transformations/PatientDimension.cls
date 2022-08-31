@@ -7,7 +7,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	try {
         set target = ##class(I2B2onFHIR.Messages.PatientDimensionTransformResponse).%New()
         set target.sexcd = ..SexCD(source.json) //source.json."gender"
-        set target.patientnum =..getI2B2ID("patient", source.json.id) //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
+        //set target.patientnum =..getI2B2ID("patient", source.json.id) //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
         set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
         set target.deathdate =  source.json."deceasedDateTime"
@@ -24,7 +24,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.downloaddate = ..DownloadDate(source.json)
         set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
-        set target.uploadid = ..getI2B2ID("patient", source.json.id) //..UploadId(source.json)
+        
+        //Index patientdimensionpk On patientnum [ PrimaryKey, SqlName = patient_dimension_pk, Type = index, Unique ];
+        set target.patientnum = ..getI2B2ID("patient", source.json.id) //..UploadId(source.json)
+        set target.uploadid = target.patientnum
 
 	} catch e {
 		s sc = e.AsStatus()
