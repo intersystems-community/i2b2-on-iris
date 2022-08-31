@@ -11,10 +11,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.patientide=source.json."id"
         set target.patientidesource=..IdeSource()
         set target.patientidestatus=source.json."_deceasedBoolean"."id"
-        set target.projectid="TEST"
-        if ..ProjectID(.projectid) {
-	        set target.projectid=projectid
-        }
+        do ..ProjectID(.projectid)
+        set target.projectid=$S(projectid'="":projectid,1:"TEST")
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()

@@ -90,7 +90,7 @@ ClassMethod getIDfromTable(Table As %String = "", Field As %String = "", Value A
 
       set tr = ts.%Execute(Value)
       if tr.%Next() {
-        set ID = tr.%ID
+        set ID = tr.ID
       } 
  	} 
 	catch e {

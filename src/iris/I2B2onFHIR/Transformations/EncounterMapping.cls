@@ -5,8 +5,6 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 {
 	s sc = $$$OK
 	try {
-		 
-
 		set refType = $p(source.json."subject"."reference", "/", 1)
 		$$$TRACE("refType = "_refType)
         set refId = $p(source.json."subject"."reference", "/", 2)
@@ -30,10 +28,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.encounteride=source.json.id
         set target.encounteridesource=..IdeSource()
         set target.encounteridestatus="A"
-        set target.projectid="TEST"		//PM_PROJECT_DATA.project_id  //???
-        if ..ProjectID(.projectid) {
-	        set target.projectid=projectid
-        }
+        do ..ProjectID(.projectid)
+        set target.projectid=$S(projectid'="":projectid,1:"TEST") //PM_PROJECT_DATA.project_id  //???
         set target.importdate=..CurrentDT()
         set target.patientide=patient.patientide		//patient_mapping.patient_ide
         set target.patientidesource=patient.patientidesource	//patient_mapping.patient_ide_source			
