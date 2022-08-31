@@ -18,8 +18,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()
-        //Index patientmappingpk On (patientide, patientidesource, projectid) [ PrimaryKey, SqlName = patient_mapping_pk, Type = index, Unique ];
-        set target.patientnum = ..getI2B2ID("patient", source.json."id",$lb(target.patientide, target.patientidesource, target.projectid)) //..UploadId(source.json)
+
+        set target.patientnum = ..getI2B2ID("patient", source.json."id") //..UploadId(source.json)
         set target.uploadid = target.patientnum
 
 	} catch e {

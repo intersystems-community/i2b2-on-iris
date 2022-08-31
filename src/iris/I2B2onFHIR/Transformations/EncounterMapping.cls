@@ -8,16 +8,23 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		 
 
 		set refType = $p(source.json."subject"."reference", "/", 1)
+		$$$TRACE("refType = "_refType)
         set refId = $p(source.json."subject"."reference", "/", 2)
-        set patientnum=..getI2B2ID(refType, refId) //patient_mapping.patient_num
-
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientmapping""", "patient_num", patientnum, .ID)
+        $$$TRACE("refId = "_refId)
+        set patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId,1) //patient_mapping.patient_num
+        $$$TRACE("patientnum = "_patientnum)
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patient_mapping""", "patient_num", patientnum, .ID)
+		$$$TRACE("ID = "_ID)
 		if $$$ISERR(sc) Q
 		#dim patient as public.patientmapping = $$$NULLOREF
 		if ID > 0 {
-			set patient = ##class(public.patientmapping).%OpenId(ID)
+			set patient = ##class(public.patientmapping).%OpenId(ID,,.sc)
 		}
-		
+		if '$IsObject(patient) {
+			S sc = $$$ERROR("Patient not found in patientmapping")
+		}		
+		if $$$ISERR(sc) Q
+		$$$TRACE("patient = "_patient)
         set target = ##class(I2B2onFHIR.Messages.EncounterMappingTransformResponse).%New()
         set target.downloaddate=..CurrentDT()
         set target.encounteride=source.json.id
