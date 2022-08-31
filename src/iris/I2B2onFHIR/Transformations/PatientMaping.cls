@@ -27,27 +27,5 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
-ClassMethod ProjectID(Output ID As %String) As %Status
-{
-	S ID=""
-	S sc = $$$OK
-	try {
-      set sql = "SELECT project_id FROM ""public"".""pm_project_data"""
-      
-      set ts = ##class(%SQL.Statement).%New()
-      set sc=ts.%Prepare(sql)
-      quit:$$$ISERR(sc)
-
-      set tr = ts.%Execute()
-      if tr.%Next() {
-        set ID = tr.%Get("project_id")
-      } 
- 	} 
-	catch e {
-		s sc = e.AsStatus()
-	}
-	q sc
-}
-
 }
 
