@@ -17,9 +17,9 @@ ClassMethod Transform(source As Ens.Request, target As Ens.Request) As %Status
 /// returns new ID for I2B2 record based on FHIR resource name and resource ID
 /// in case if record already exists - returns an ID which was generated before
 /// this may be used to find an existing parent record and get some date from it
-ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", i2b2Link) As %String
+ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", i2b2Link = "") As %String
 {
-	quit ##class(I2B2onFHIR.Utils.Main).getI2B2ID(resourceName, FHIRID, 0, .i2b2Link)
+	quit ##class(I2B2onFHIR.Utils.Main).getI2B2ID(resourceName, FHIRID, 0, i2b2Link)
 }
 
 ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
