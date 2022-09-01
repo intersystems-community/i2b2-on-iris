@@ -37,7 +37,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()  //??? //записываем даты обновлений
         set target.uploaddate=..CurrentDT()
         //Index encountermappingpk On (encounteride, encounteridesource, projectid, patientide, patientidesource) [ PrimaryKey, SqlName = encounter_mapping_pk, Type = index, Unique ];
-        set target.encounternum=##class(I2B2onFHIR.Utils.Main).getI2B2ID("encounter", source.json.id,1) //..GenerateNum(source.json)
+        set target.encounternum=..getI2B2ID("encounter", source.json.id,$lb(patientnum)) //..GenerateNum(source.json)
         set target.uploadid = target.encounternum //..getI2B2ID("encounter", source.json.id) //..UploadId(source.json)
         
 
