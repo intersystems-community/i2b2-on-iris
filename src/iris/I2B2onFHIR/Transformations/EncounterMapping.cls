@@ -5,8 +5,6 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 {
 	s sc = $$$OK
 	try {
-		 
-
 		set refType = $p(source.json."subject"."reference", "/", 1)
 		$$$TRACE("refType = "_refType)
         set refId = $p(source.json."subject"."reference", "/", 2)
@@ -30,10 +28,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.encounteride=source.json.id
         set target.encounteridesource=..IdeSource()
         set target.encounteridestatus="A"
-        set target.projectid="TEST"		//PM_PROJECT_DATA.project_id  //???
-        if ..ProjectID(.projectid) {
-	        set target.projectid=projectid
-        }
+        do ..ProjectID(.projectid)
+        set target.projectid=$S(projectid'="":projectid,1:"TEST") //PM_PROJECT_DATA.project_id  //???
         set target.importdate=..CurrentDT()
         set target.patientide=patient.patientide		//patient_mapping.patient_ide
         set target.patientidesource=patient.patientidesource	//patient_mapping.patient_ide_source			
@@ -41,7 +37,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()  //??? //записываем даты обновлений
         set target.uploaddate=..CurrentDT()
         //Index encountermappingpk On (encounteride, encounteridesource, projectid, patientide, patientidesource) [ PrimaryKey, SqlName = encounter_mapping_pk, Type = index, Unique ];
-        set target.encounternum=##class(I2B2onFHIR.Utils.Main).getI2B2ID("encounter", source.json.id,1) //..GenerateNum(source.json)
+        set target.encounternum=..getI2B2ID("encounter", source.json.id,$lb(patientnum)) //..GenerateNum(source.json)
         set target.uploadid = target.encounternum //..getI2B2ID("encounter", source.json.id) //..UploadId(source.json)
         
 

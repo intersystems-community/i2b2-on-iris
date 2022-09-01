@@ -8,7 +8,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.VisitDimensionTransformResponse).%New()
         set target.activestatuscd= ..ActiveStatusCD(source.json)
         set target.downloaddate=..CurrentDT()
-        set target.enddate=source.json.period.end
+        set target.enddate=$tr($p(source.json.period.end,"+"),"T"," ")
         set target.importdate=..CurrentDT()
         set target.inoutcd=..InoutCD(source.json)
         set target.lengthofstay=..LengthOfStay(source.json)
@@ -18,7 +18,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set refId = $p(source.json."subject"."reference", "/", 2)
         set target.patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId, 1) //patient_mapping.patient_num 
         set target.sourcesystemcd=..SourceSystemCD(source.json)
-        set target.startdate=source.json.period.start
+        set target.startdate=$tr($p(source.json.period.start,"+"),"T"," ")
         set target.updatedate=..CurrentDT()
         
         //Index visitdimensionpk On (encounternum, patientnum) [ PrimaryKey, SqlName = visit_dimension_pk, Type = index, Unique ];
