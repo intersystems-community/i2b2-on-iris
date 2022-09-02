@@ -52,6 +52,7 @@ ClassMethod ProviderId() As %String [ Private ]
 ClassMethod NameChar(json As %DynamicObject) As %Library.String
 {
 	//"Practitioner.name.family", "Practitioner.name.given", "Practitioner.name.prefix"
+	I '$IsObject(json.name) Q ""
 	set fam = json.name.family
 	set nam = ""
 	set prefix = ""
