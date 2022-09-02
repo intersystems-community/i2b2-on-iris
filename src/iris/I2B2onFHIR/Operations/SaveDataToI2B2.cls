@@ -56,7 +56,7 @@ Method providerDimensionSave(pRequest As I2B2onFHIR.Messages.ProviderDimensionTr
 		quit:$$$ISERR(sc)
 
 		set sc=rs.Execute(pRequest.providerid, pRequest.providerpath, pRequest.namechar, pRequest.providerblob, pRequest.updatedate,
-                      pRequest.updatedate, pRequest.downloaddate, pRequest.importdate, pRequest.sourcesystemcd, pRequest.uploadid)
+                      pRequest.downloaddate, pRequest.importdate, pRequest.sourcesystemcd, pRequest.uploadid)
 		quit:$$$ISERR(sc)
 
 

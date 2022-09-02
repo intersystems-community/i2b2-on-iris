@@ -17,7 +17,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()
 
-        set target.patientnum = ..getI2B2ID("patient", source.json."id") //..UploadId(source.json)
+        set target.patientnum = ..getI2B2ID("patient", source.json."id",,"patient_dimension") //..UploadId(source.json)
         set target.uploadid = target.patientnum
 
 	} catch e {
