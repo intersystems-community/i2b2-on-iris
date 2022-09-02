@@ -9,8 +9,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		$$$TRACE("refType = "_refType)
         set refId = $p(source.json."subject"."reference", "/", 2)
         $$$TRACE("refId = "_refId)
-        set patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId,1) //patient_mapping.patient_num
+        set patientnum=..getI2B2ID(refType, refId,,"patient_dimension") //patient_mapping.patient_num // we cannot open patient_mapping here
         $$$TRACE("patientnum = "_patientnum)
+		
+		
 		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patient_mapping""", "patient_num", patientnum, .ID)
 		$$$TRACE("ID = "_ID)
 		if $$$ISERR(sc) Q
@@ -22,6 +24,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 			S sc = $$$ERROR("Patient not found in patientmapping")
 		}		
 		if $$$ISERR(sc) Q
+		
 		$$$TRACE("patient = "_patient)
         set target = ##class(I2B2onFHIR.Messages.EncounterMappingTransformResponse).%New()
         set target.downloaddate=..CurrentDT()
@@ -37,7 +40,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()  //??? //записываем даты обновлений
         set target.uploaddate=..CurrentDT()
         //Index encountermappingpk On (encounteride, encounteridesource, projectid, patientide, patientidesource) [ PrimaryKey, SqlName = encounter_mapping_pk, Type = index, Unique ];
-        set target.encounternum=..getI2B2ID("encounter", source.json.id,$lb(patientnum)) //..GenerateNum(source.json)
+        set target.encounternum=..getI2B2ID("encounter", source.json.id,$lb(patientnum),"visit_dimension") //..GenerateNum(source.json)
         set target.uploadid = target.encounternum //..getI2B2ID("encounter", source.json.id) //..UploadId(source.json)
         
 

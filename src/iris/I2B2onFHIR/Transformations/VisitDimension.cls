@@ -22,13 +22,29 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.updatedate=..CurrentDT()
         
         //Index visitdimensionpk On (encounternum, patientnum) [ PrimaryKey, SqlName = visit_dimension_pk, Type = index, Unique ];
-        set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum)) //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
+        set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum),"visit_dimension") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
         set target.uploadid = target.encounternum //encounter_mapping.encounter_num 
         set target.visitblob=""
+        
+        do ..TempSaveData(source.json)
 	} catch e {
 		s sc = e.AsStatus()
 	}
 	q sc
+}
+
+ClassMethod TempSaveData(json As %DynamicObject) As %Status [ Private ]
+{
+	S itr = json.participant.%GetIterator()
+	while itr.%GetNext(.key,.value) {
+		s val = value."individual"."reference"
+		i val="" continue
+		S ^TempSaveData($zcvt($p(val,"/"),"L"),$p(val,"/",2))=json.id
+		if json.class.code '= "" {
+			S ^TempSaveData($zcvt($p(val,"/"),"L"),$p(val,"/",2),"class.code")=json.class.code
+		}
+	}
+	Q $$$OK
 }
 
 ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]

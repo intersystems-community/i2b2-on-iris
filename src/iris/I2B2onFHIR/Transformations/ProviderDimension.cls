@@ -25,14 +25,20 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 
 ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 {
-	//Concat:('\i2b2\Providers\', Encounter.classHistory.class, '\' , provider_dimension.name_char, '\')
+	//Concat:('\i2b2\Providers\', Encounter.class.code, '\' , provider_dimension.name_char, '\')
 	//A string representing the unique position of a provider in a hierarchical department tree.
 	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
+	
+	
+	set classcode=$g(^TempSaveData("practitioner",json.id),"class.code")
+	
+	
 	S $p(result,"\",2)="i2b2"
 	S $p(result,"\",3)="Providers"
-	S $p(result,"\",4)="" ;Encounter.classHistory.class -- Как получить здесь???
+	S $p(result,"\",4)=classcode ;Encounter.class.code -- Как получить здесь???
 	S $p(result,"\",5)=..NameChar(json)
 	S $p(result,"\",6)=""
+	Q result
 }
 
 ClassMethod ProviderId() As %String [ Private ]

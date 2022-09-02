@@ -35,7 +35,7 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
         // check resource type
         // skip unknown resources
-        if ",patient,encounter,practitioner,observation_fact,"'[(","_resourceType_","){
+        if ",patient,encounter,practitioner,observation,"'[(","_resourceType_","){
             
             // generate error ???
             $$$TRACE("Unknown resource type "_resourceType)
@@ -62,7 +62,7 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
         set patientsList = ""
         // 2 process records in particular order
-        for dataType = "patient", "encounter", "practitioner", "observation_fact" {
+        for dataType = "patient", "encounter", "practitioner", "observation" {
             
             set target = $s(dataType = "patient":..#TARGETPATIENT, dataType = "encounter":..#TARGETENCOUNTER, dataType = "practitioner":..#TARGETPRACTITIONER, 1:"")
             continue:target=""
