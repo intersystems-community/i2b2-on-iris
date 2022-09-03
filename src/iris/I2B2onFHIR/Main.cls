@@ -38,6 +38,16 @@ XData ProductionDefinition
   </Item>
   <Item Name="Processes.ObservationFact" Category="" ClassName="I2B2onFHIR.Processes.ObservationFact" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
   </Item>
+  <Item Name="I2B2onFHIR.Processes.ExportFhir2File" Category="" ClassName="I2B2onFHIR.Processes.ExportFhir2File" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+  </Item>
+  <Item Name="I2B2onFHIR.Operations.SaveFHIR" Category="" ClassName="EnsLib.File.PassthroughOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="FilePath">/irisrun/repo</Setting>
+    <Setting Target="Host" Name="Filename">%f_%Q%!+(_a).json</Setting>
+  </Item>
+  <Item Name="I2B2onFHIR.Operations.GetFHIR" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="HTTPPort">52773</Setting>
+    <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
+  </Item>
 </Production>
 }
 

@@ -8,11 +8,9 @@ Parameter InteractionsClass As %String = "I2B2.HS.FHIRServer.Storage.Json.Intera
 /// Returns the classname of the persistent object used store resources for the specified type
 Method GetProxyClass(pResourceType As %String) As %String
 {
-	i pResourceType = "Patient" {
-		q "I2B2.FHIR.Proxy.Patient"
-	} else {
-		q ""
-	}
+	q:pResourceType="Patient" "I2B2.FHIR.Proxy.Patient"
+	q:pResourceType="Practitioner" "I2B2.FHIR.Proxy.Practitioner"
+	q ""
 }
 
 /// Returns the classname of the persistent object used store older resource versions for the specified type
