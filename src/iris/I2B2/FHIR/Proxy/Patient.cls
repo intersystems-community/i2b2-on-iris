@@ -37,6 +37,24 @@ ClassMethod getPatientId(pResourceId As %String) As %String
 	}
 }
 
+ClassMethod getResourceIdByPatientId(pPatientId As %String) As %String
+{
+	set sql = "SELECT fhirId FROM I2B2onFHIR_storage.Ids LEFT JOIN I2B2onFHIR_storage.IdsLinks "_
+			  "ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId "_
+			  "where tableName='patient_dimension' and $LISTGET(i2b2Link, 1)=?"
+
+	set ts = ##class(%SQL.Statement).%New()
+	set sc=ts.%Prepare(sql)
+	i $$$ISERR(sc) $$$ThrowFHIR($$$GeneralError, $system.Status.GetErrorText(sc))
+
+	set tr = ts.%Execute(pPatientId)
+	if (tr.%Next()) {
+		q tr.fhirId
+	} else {
+		q ""
+	}
+}
+
 /// Check if resource exists
 /// rsrcKey = $$$BuildRsrcKey(pResourceType, pResourceId), for example: "Patient/123"
 ClassMethod KeyIdxExists(rsrcKey As %String) As %Boolean

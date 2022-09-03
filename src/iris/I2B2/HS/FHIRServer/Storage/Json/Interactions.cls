@@ -542,6 +542,7 @@ Method getTableForResourceType(resourceType As %String) As %String
 {
 	q:resourceType="Patient" "patient_dimension"
 	q:resourceType="Practitioner" "provider_dimension"
+	q:resourceType="MedicationRequest" "observation_fact"
 	$$$ThrowFHIR($$$HSFHIRErrResourceTypeUnknown, resourceType)
 }
 
