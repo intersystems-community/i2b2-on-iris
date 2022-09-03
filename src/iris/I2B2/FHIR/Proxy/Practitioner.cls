@@ -13,16 +13,36 @@ Property ResourceType As %String(COLLATION = "") [ InitialExpression = "Practiti
 
 Property ResourceId As %String(MAXLEN = "");
 
+ClassMethod getResourceIds(pResourceId As %String) As %String
+{
+	set sql = "SELECT i2b2Link FROM I2B2onFHIR_storage.Ids LEFT JOIN I2B2onFHIR_storage.IdsLinks "_
+			  "ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId "_
+			  "where tableName='provider_dimension' and fhirId=?"
+
+	set ts = ##class(%SQL.Statement).%New()
+	set sc=ts.%Prepare(sql)
+	i $$$ISERR(sc) $$$ThrowFHIR($$$GeneralError, $system.Status.GetErrorText(sc))
+
+	set tr = ts.%Execute(pResourceId)
+	if (tr.%Next() && (tr.i2b2Link '= "")) {
+		q tr.i2b2Link
+	} else {
+		q ""
+	}
+}
+
 /// Check if resource exists
 /// rsrcKey = $$$BuildRsrcKey(pResourceType, pResourceId), for example: "Practitioner/123"
 ClassMethod KeyIdxExists(rsrcKey As %String) As %Boolean
 {
-	q 1
 	s pResourceId = $p(rsrcKey, "/", 2)
-	// get data from I2B2onFHIR.Storage.Ids
-	#; s pProviderId = 
-	#; s pProviderPath = 
-	#; q ##class(public.providerdimension).providerdimensionpkExists(pProviderPath, pProviderId)
+
+	s resourceIds = ..getResourceIds(pResourceId)
+	if resourceIds'="" {
+		q ##class(public.providerdimension).providerdimensionpkExists($lg(resourceIds, 1), $lg(resourceIds, 2))
+	} else {
+		q 1
+	}
 }
 
 /// Get resource
@@ -33,9 +53,13 @@ ClassMethod KeyIdxOpen(rsrcKey As %String, empty, tSC As %Status) As I2B2.FHIR.P
 	s pResourceType = $p(rsrcKey, "/")
 	s pResourceId = $p(rsrcKey, "/", 2)
 	// get data from I2B2onFHIR.Storage.Ids
-	s pProviderId = "LCS-I2B2:D000109060"
-	s pProviderPath = "\i2b2\Providers\Medicine\Primary Care\Welby, Marcus, MD\"
+	s resourceIds = ..getResourceIds(pResourceId)
+	s pProviderPath = $lg(resourceIds, 1)
+	s pProviderId = $lg(resourceIds, 2)
 
+	i resourceIds="" {
+		$$$ThrowFHIR($$$HSFHIRErrResourceNotFound, pResourceType, pResourceId,$$$OutcomeNotFound)
+	}
 	s providerDimension = ##class(public.providerdimension).providerdimensionpkOpen(pProviderPath, pProviderId)
 	i '$iso(providerDimension) {
 		$$$ThrowFHIR($$$HSFHIRErrResourceNotFound, pResourceType, pResourceId,$$$OutcomeNotFound)
