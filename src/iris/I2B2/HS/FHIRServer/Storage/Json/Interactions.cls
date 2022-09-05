@@ -260,7 +260,8 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 		$$$ThrowOnError(sc)
 		if rsrc.Deleted continue
 		
-		set patientId = $Select(rsrc.ResourceType="Patient":rsrc.ResourceId, 1:..GetPatientCompartmentId(rsrc.Compartments.Serialize()))
+		#; set patientId = $Select(rsrc.ResourceType="Patient":rsrc.ResourceId, 1:..GetPatientCompartmentId(rsrc.Compartments.Serialize()))
+		set patientId = $Select(rsrc.ResourceType="Patient":rsrc.ResourceId, 1:"")
 		do tResultSet.AddRow(rsrc.Key, rsrc.ResourceType,  rsrc.ResourceId, rsrc.VersionId, "match",,,,patientId)
 		
 		if $D(includeConfig) {
@@ -284,7 +285,7 @@ Method getSearchColumnsForType(resourceType As %String) As %ListOfObjects(ELEMEN
 		i resourceType = "Patient" {
 			Set columns = ##class(%ListOfObjects).%New()
 			//
-			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||columnsXData",,.sc)
+			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||PatientColumnsXData",,.sc)
 			i $$$ISERR(sc) $$$ThrowStatus(sc)
 			s reader = ##class(%XML.Reader).%New()
 			s sc = reader.OpenStream(columnsXData.Data)
@@ -305,6 +306,22 @@ Method getSearchColumnsForType(resourceType As %String) As %ListOfObjects(ELEMEN
 			}
 			//
 			Set ..spcache(resourceType) = columns
+		} elseif resourceType = "Practitioner" {
+			Set columns = ##class(%ListOfObjects).%New()
+			//
+			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||PractitionerColumnsXData",,.sc)
+			i $$$ISERR(sc) $$$ThrowStatus(sc)
+			s reader = ##class(%XML.Reader).%New()
+			s sc = reader.OpenStream(columnsXData.Data)
+			i $$$ISERR(sc) $$$ThrowStatus(sc)
+			d reader.Correlate("SearchColumn","I2B2.HS.FHIRServer.Storage.Json.SearchColumn")
+			while (reader.Next(.column,.sc)) {
+				i $$$ISERR(sc) $$$ThrowStatus(sc)  //q:$$$ISERR(sc)
+				Do columns.Insert(column)
+				Set ..spcache(resourceType, column.ParamName) = columns.Count()
+			}
+			//
+			Set ..spcache(resourceType) = columns
 		} elseif resourceType = "Resource" {
 			// do nothing
 			Set columns = ##class(%ListOfObjects).%New()
@@ -316,7 +333,7 @@ Method getSearchColumnsForType(resourceType As %String) As %ListOfObjects(ELEMEN
 	return columns
 }
 
-XData columnsXData
+XData PatientColumnsXData
 {
 <Columns>
 <SearchColumn>
@@ -437,14 +454,50 @@ XData columnsXData
 </Columns>
 }
 
+XData PractitionerColumnsXData
+{
+<Columns>
+<SearchColumn>
+<ParamName>family</ParamName>
+<ColumnName>$PIECE(provider_dimension.name_char, ', ', 1)</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>provider_dimension</TableName>
+</SearchColumn>
+<SearchColumn>
+<ParamName>given</ParamName>
+<ColumnName>$PIECE(provider_dimension.name_char, ', ', 2)</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>provider_dimension</TableName>
+</SearchColumn>
+<SearchColumn>
+<ParamName>_id</ParamName>
+<ColumnName>provider_dimension.provider_path</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>provider_dimension</TableName>
+</SearchColumn>
+<SearchColumn>
+<ParamName>identifier</ParamName>
+<ColumnName>provider_dimension.provider_path</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>provider_dimension</TableName>
+</SearchColumn>
+</Columns>
+}
+
 /// @Override
 Method getTableForResourceType(resourceType As %String) As %String
 {
-	i resourceType = "Patient" {
-		q "patient_dimension"
-	} else {
-		$$$ThrowFHIR($$$HSFHIRErrResourceTypeUnknown, resourceType)
-	}
+	q:resourceType="Patient" "patient_dimension"
+	q:resourceType="Practitioner" "provider_dimension"
+	$$$ThrowFHIR($$$HSFHIRErrResourceTypeUnknown, resourceType)
 }
 
 Method WhereClause(pParentTableName As %String, pSearchColumn As HS.FHIRServer.Storage.Json.SearchColumn, pModifier As %String, pVals, ByRef pSQLParams) As %String
