@@ -135,8 +135,8 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 					s arrJoin(column.Join)=""
 					s fromClause = fromClause_" LEFT JOIN "_column.TableName_" on "_column.Join
 				}
-				i column.From '= "" && '$d(arrFrom(column.From)) {
-					s arrFrom(column.From)=""
+				i column.From '= "" && '$d(arrFrom($e(column.From,1,250))) {
+					s arrFrom($e(column.From,1,250))=""
 					s fromClause = fromClause_" "_column.From
 				}
 			}		
@@ -149,8 +149,8 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 				s arrJoin(column.Join)=""
 				s fromClause = fromClause_" LEFT JOIN "_column.TableName_" on "_column.Join
 			}
-			i column.From '= "" && '$d(arrFrom(column.From)) {
-				s arrFrom(column.From)=""
+			i column.From '= "" && '$d(arrFrom($e(column.From,1,250))) {
+				s arrFrom($e(column.From,1,250))=""
 				s fromClause = fromClause_" "_column.From
 			}
 		}			
@@ -329,10 +329,10 @@ Method getSearchColumnsForType(resourceType As %String) As %ListOfObjects(ELEMEN
 			}
 			//
 			Set ..spcache(resourceType) = columns
-		} elseif resourceType = "Practitioner" {
+		} elseif (resourceType = "Practitioner") || (resourceType = "MedicationRequest") {
 			Set columns = ##class(%ListOfObjects).%New()
 			//
-			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||PractitionerColumnsXData",,.sc)
+			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||"_resourceType_"ColumnsXData",,.sc)
 			i $$$ISERR(sc) $$$ThrowStatus(sc)
 			s reader = ##class(%XML.Reader).%New()
 			s sc = reader.OpenStream(columnsXData.Data)
@@ -531,6 +531,50 @@ ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=provider_dimension.provider_path 
 and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=provider_dimension.provider_id
 and I2B2onFHIR_storage.IdsLinks.tableName='provider_dimension'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
+</SearchColumn>
+</Columns>
+}
+
+XData MedicationRequestColumnsXData
+{
+<Columns>
+<SearchColumn>
+<ParamName>_id</ParamName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>observation_fact</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=observation_fact.patient_num 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=observation_fact.concept_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 3)=observation_fact.modifier_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 4)=observation_fact.start_date
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 5)=observation_fact.encounter_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 6)=observation_fact.instance_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 7)=observation_fact.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='observation_fact'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
+</SearchColumn>
+<SearchColumn>
+<ParamName>identifier</ParamName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>observation_fact</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=observation_fact.patient_num 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=observation_fact.concept_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 3)=observation_fact.modifier_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 4)=observation_fact.start_date
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 5)=observation_fact.encounter_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 6)=observation_fact.instance_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 7)=observation_fact.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='observation_fact'
 JOIN I2B2onFHIR_storage.Ids 
 ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 </SearchColumn>

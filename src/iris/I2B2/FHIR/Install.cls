@@ -15,10 +15,25 @@ ClassMethod Install()
 		Set configData = strategy.GetServiceConfigData()
 		Set configData.DebugMode = 4
 		Do strategy.SaveServiceConfigData(configData)
+		Do ..CreateCredentials()
 	} catch ex {
 		Write $system.Status.GetErrorText(ex.AsStatus())
 	}
 	Quit
+}
+
+// create credentials for access FHIR endpoint
+
+ClassMethod CreateCredentials()
+{
+	s cred = ##class(Ens.Config.Credentials).%New()
+	s cred.SystemName = "FHIR"
+	s cred.Username = "_SYSTEM"
+	s cred.Password = "SYS"
+	s sc = cred.%Save()
+	if $$$ISERR(sc) {
+		throw $$$ERROR($$$GeneralError, $system.Status.GetErrorText(sc))
+	}
 }
 
 ClassMethod LoadDefData(FileName As %String, Nsp As %String = "")

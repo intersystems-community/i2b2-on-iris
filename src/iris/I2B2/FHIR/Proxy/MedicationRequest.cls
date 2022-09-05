@@ -3,7 +3,7 @@ Class I2B2.FHIR.Proxy.MedicationRequest Extends I2B2.FHIR.Proxy.Base
 
 Property ObservationFact As public.observationfact;
 
-Property Key As %String(MAXLEN = "") [ Calculated, SqlComputeCode = {Set {*} = {ResourceType_}_"/"_{ResourceId}}, SqlComputed ];
+Property Key As %String(MAXLEN = "") [ Calculated, SqlComputeCode = {Set {*} = "MedicationRequest/"_{ResourceId}}, SqlComputed ];
 
 Property ResourceType As %String(COLLATION = "") [ InitialExpression = "MedicationRequest" ];
 
