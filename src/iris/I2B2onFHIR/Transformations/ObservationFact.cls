@@ -7,14 +7,14 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 	try {
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()	
 	
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visitdimension""", "patient_num", source.patientNum, .ID)
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visit_dimension""", "patient_num", source.patientNum, .ID)
 		if $$$ISERR(sc) Q
 		#dim counter as public.visitdimension = $$$NULLOREF
 		if ID > 0 {
 			set counter = ##class(public.visitdimension).%OpenId(ID)
 		}
 		
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patientdimension""", "patient_num", source.patientNum, .ID)
+		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""patient_dimension""", "patient_num", source.patientNum, .ID)
 		if $$$ISERR(sc) Q
 		#dim patient as public.patientdimension = $$$NULLOREF
 		if ID > 0 {
@@ -23,7 +23,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		
 		#dim provider as public.providerdimension = $$$NULLOREF
 		if $IsObject(counter) {
-			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""providerdimension""", "uploadid", counter.uploadid, .ID)
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""provider_dimension""", "uploadid", counter.uploadid, .ID)
 		}
 		if $$$ISERR(sc) Q
 		if ID > 0 {
@@ -32,7 +32,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		
 		#dim concept as public.conceptdimension = $$$NULLOREF
 		if $IsObject(counter) {
-			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""conceptdimension""", "uploadid", counter.uploadid, .ID)
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""concept_dimension""", "uploadid", counter.uploadid, .ID)
 		}
 		if $$$ISERR(sc) Q
 		if ID > 0 {
