@@ -5,6 +5,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 {
 	s sc = $$$OK
 	try {
+		$$$TRACE("ObservationFact Transform. Start")
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()	
 	
 		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visit_dimension""", "patient_num", source.patientNum, .ID)
@@ -21,23 +22,29 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 			set patient = ##class(public.patientdimension).%OpenId(ID)
 		}
 		
-		#dim provider as public.providerdimension = $$$NULLOREF
-		if $IsObject(counter) {
-			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""provider_dimension""", "uploadid", counter.uploadid, .ID)
+		// хардкод для демонстрации
+		#dim provider as public.providerdimension = ##class(public.providerdimension).%New()
+		set provider.providerid = 1
+		
+		//#dim provider as public.providerdimension = $$$NULLOREF
+		/*if $IsObject(counter) {
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""provider_dimension""", "upload_id", counter.uploadid, .ID)
 		}
 		if $$$ISERR(sc) Q
 		if ID > 0 {
 			set provider = ##class(public.providerdimension).%OpenId(ID)
-		}	
+		}
+		*/	
 		
 		#dim concept as public.conceptdimension = $$$NULLOREF
 		if $IsObject(counter) {
-			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""concept_dimension""", "uploadid", counter.uploadid, .ID)
+			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""concept_dimension""", "upload_id", counter.uploadid, .ID)
 		}
 		if $$$ISERR(sc) Q
 		if ID > 0 {
 			set concept = ##class(public.conceptdimension).%OpenId(ID)
 		}	
+		$$$TRACE("ObservationFact Transform. 1")
 	
 
 
@@ -47,10 +54,12 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 			if $$$ISOK(ok) {
 				do target.data.Insert(record)
 			}
+		$$$TRACE("ObservationFact Transform. 2")
 		}
 	} catch e {
 		s sc = e.AsStatus()
 	}
+	$$$TRACE("ObservationFact Transform. End")
 	q sc
 }
 
@@ -58,14 +67,15 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 ClassMethod AGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 	
+	$$$TRACE("ObservationFact Transform. AGE")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|AGE:"_patient.ageinyearsnum		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|AGE:"_patient.ageinyearsnum		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -89,16 +99,18 @@ ClassMethod AGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 /// for all patients
 ClassMethod DATEB(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
+	$$$TRACE("ObservationFact Transform. DATEB")
+	
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|DATE:"_patient.birthdate  //DEM|DATE:BIRTH
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|DATE:"_patient.birthdate  //DEM|DATE:BIRTH
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
-	s record.tvalchar = patient.birthdate
-	s record.nvalnum=$tr(patient.birthdate," -:",".")				
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(patient) record.tvalchar = patient.birthdate
+	s:$IsObject(patient) record.nvalnum=$tr(patient.birthdate," -:",".")				
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -121,17 +133,19 @@ ClassMethod DATEB(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 /// only for patients with a filled in date of death: Patient_dimension.death_date
 ClassMethod DATED(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
-	if patient.deathdate = "" Q $$$ERROR("Patient is alive")
+	$$$TRACE("ObservationFact Transform. DATED")
+	
+	if $IsObject(patient),patient.deathdate = "" Q $$$ERROR("Patient is alive")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|DATE:"_patient.deathdate  //DEM|DATE:DEATH
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|DATE:"_patient.deathdate  //DEM|DATE:DEATH
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date  самого  последнего  визита // необходим перебор?
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date  самого  последнего  визита // необходим перебор?
 	s record.enddate = record.startdate		//observation_fact.start_date
-	s record.tvalchar = patient.deathdate
-	s record.nvalnum=$tr(patient.deathdate," -:",".")				
+	s:$IsObject(patient) record.tvalchar = patient.deathdate
+	s:$IsObject(patient) record.nvalnum=$tr(patient.deathdate," -:",".")				
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -152,15 +166,17 @@ ClassMethod DATED(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 /// only for patients with a filled in Patient_dimension.language_cd
 ClassMethod LANGUAGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
-	if patient.languagecd = "" Q $$$ERROR("languagecd is empty")
+	$$$TRACE("ObservationFact Transform. LANGUAGE")
+	
+	if $IsObject(patient),patient.languagecd = "" Q $$$ERROR("languagecd is empty")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|LANGUAGE:"_patient.languagecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|LANGUAGE:"_patient.languagecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 	
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -183,15 +199,17 @@ ClassMethod LANGUAGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pat
 /// only for patients with a filled in  Patient_dimension.language_cd
 ClassMethod MARITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
-	if patient.languagecd = "" Q $$$ERROR("languagecd is empty")
+	$$$TRACE("ObservationFact Transform. MARITAL")
+	
+	if $IsObject(patient),patient.languagecd = "" Q $$$ERROR("languagecd is empty")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|MARITAL:"_patient.languagecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|MARITAL:"_patient.languagecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -214,15 +232,17 @@ ClassMethod MARITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pati
 /// only for patients with a filled in  Patient_dimension.language_cd
 ClassMethod RACE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
-	if patient.languagecd = "" Q $$$ERROR("languagecd is empty")
+	$$$TRACE("ObservationFact Transform. RACE")
+	
+	if $IsObject(patient),patient.languagecd = "" Q $$$ERROR("languagecd is empty")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|RACE:"_patient.racecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|RACE:"_patient.racecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -245,15 +265,17 @@ ClassMethod RACE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient
 /// only for patients with a filled in  Patient_dimension.language_cd
 ClassMethod RELIGION(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
-	if patient.languagecd = "" Q $$$ERROR("languagecd is empty")
+	$$$TRACE("ObservationFact Transform. RELIGION")
+	
+	if $IsObject(patient),patient.languagecd = "" Q $$$ERROR("languagecd is empty")
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|RELIGION:"_patient.religioncd		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|RELIGION:"_patient.religioncd		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -276,14 +298,16 @@ ClassMethod RELIGION(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pat
 /// for all patients
 ClassMethod SEX(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
+	$$$TRACE("ObservationFact Transform. SEX")
+	
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|SEX:"_$zcvt(patient.sexcd,"L")		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|SEX:"_$zcvt(patient.sexcd,"L")		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
@@ -306,14 +330,16 @@ ClassMethod SEX(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 /// only for patients with a filled in Patient_dimension.vital_status_cd
 ClassMethod VITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
+	$$$TRACE("ObservationFact Transform. VITAL")
+	
 	s record.patientnum = source.patientNum
 
-	s record.conceptcd="DEM|VITAL:"_$zcvt(patient.vitalstatuscd,"L")		//concept.conceptcd_":"_patient.ageinyearsnum //???
-	s record.encounternum=counter.encounternum 
-	s record.providerid=provider.providerid
+	s:$IsObject(patient) record.conceptcd="DEM|VITAL:"_$zcvt(patient.vitalstatuscd,"L")		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(counter) record.encounternum=counter.encounternum 
+	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
-	s record.startdate = counter.startdate	//visit_dimension.start_date //???
-	s record.enddate = record.startdate		//observation_fact.start_date
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
 
 	s record.confidencenum=""	//
 	s record.downloaddate=""	//
