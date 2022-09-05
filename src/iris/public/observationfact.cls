@@ -46,7 +46,9 @@ Property sourcesystemcd As %Library.String(MAXLEN = 50) [ SqlColumnNumber = 22, 
 
 Property uploadid As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648) [ SqlColumnNumber = 23, SqlFieldName = upload_id ];
 
-Property textsearchindex As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648) [ InitialExpression = "nextval('observation_fact_text_search_index_seq'::regclass)", Required, SqlColumnNumber = 24, SqlFieldName = text_search_index ];
+// deleted Required for presintation
+
+Property textsearchindex As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648) [ InitialExpression = "nextval('observation_fact_text_search_index_seq'::regclass)", SqlColumnNumber = 24, SqlFieldName = text_search_index ];
 
 Parameter USEEXTENTSET = 1;
 
@@ -202,3 +204,4 @@ Storage Default
 }
 
 }
+

@@ -27,7 +27,7 @@ Method observationFactSave(pRequest As I2B2onFHIR.Messages.ObservationFactTransf
         set record = pRequest.data.GetAt(elemNum)
 
           set sc=rs.Execute(record.encounternum, record.patientnum, record.conceptcd, record.providerid, record.startdate,
-                            record.modifiercd, record.instancenum, record.valtype, record.tvalchar, record.nvalnum, record.valtypecd, record.quantitynum,
+                            record.modifiercd, record.instancenum, record.valtypecd, record.tvalchar, record.nvalnum, record.valueflagcd, record.quantitynum,
                             record.unitscd, record.enddate, record.locationcd, record.observationblob, record.confidencenum, record.updatedate, record.downloaddate,
                             record.importdate, record.sourcesystemcd, record.uploadid, record.textsearchindex)
           quit:$$$ISERR(sc)
