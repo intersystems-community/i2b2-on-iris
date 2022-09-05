@@ -220,6 +220,113 @@ ClassMethod generateLinksForTestData()
 		set sc = idsLinksCls.%Save()
 		if $$$ISERR(sc) w "Data saving error",!  q
 	}
+
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	w "Processing provider_dimension",!
+	; Index providerdimensionpk On (providerpath, providerid)
+	
+	s resourceName="practitioner"
+	s SQL = "SELECT provider_path, provider_id FROM provider_dimension"
+	set ts = ##class(%SQL.Statement).%New()
+	set sc = ts.%Prepare(SQL)
+	quit:$$$ISERR(sc) ""
+
+	set tr = ts.%Execute()
+	;do tr.%Display()
+	s i2b2Id = 0
+	while tr.%Next() {
+		#; set recId = tr.ID
+		; try to recieve fhir ID from ids table
+		; all records are different
+		#; set fhirId = ..getFhirRecordID(resourceName, tr."patient_num")
+
+		#; ;w "|"_fhirId_"|",!
+
+		#; if fhirId = "" {
+			; create record in ids table
+			; bad way !!!
+			set idsCls = ##class(I2B2onFHIR.Storage.Ids).%New()
+			set idsCls.resourceName = resourceName
+			set idsCls.fhirId = ##class(%SYSTEM.Util).CreateGUID()
+			set idsCls.i2b2Id = $i(i2b2Id)   //tr."patient_num"
+			set sc = idsCls.%Save()
+			if $$$ISERR(sc) w "Data saving error",!  q
+			set lastInsertId = idsCls.%Id()
+		
+		#; } else {
+		#; 	set lastInsertId = fhirId
+
+		#; }
+		#; ; check if we already have such record and remove it
+		#; s SQL = "DELETE FROM I2B2onFHIR_Storage.IdsLinks WHERE tableName = ? AND idsId = ?"
+		#; set ts = ##class(%SQL.Statement).%New()
+		#; set sc = ts.%Prepare(SQL)
+		#; quit:$$$ISERR(sc)
+		#; set tr2 = ts.%Execute("provider_dimension", lastInsertId)
+
+		set idsLinksCls = ##class(I2B2onFHIR.Storage.IdsLinks).%New()
+		set idsLinksCls.idsId = lastInsertId
+		set idsLinksCls.tableName = "provider_dimension"
+		set idsLinksCls.i2b2Link = $lb(tr."provider_path", tr."provider_id")
+		set sc = idsLinksCls.%Save()
+		if $$$ISERR(sc) w "Data saving error",!  q
+	}
+
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+	; Index observationfactpk On (patientnum, conceptcd, modifiercd, startdate, encounternum, instancenum, providerid)
+	s resourceName="medicationRequest"
+	s tableName="observation_fact"
+	w !,!,"Processing "_tableName,!
+	
+	s SQL = "SELECT patient_num, concept_cd, modifier_cd, start_date, encounter_num, instance_num, provider_id FROM "_tableName
+	set ts = ##class(%SQL.Statement).%New()
+	set sc = ts.%Prepare(SQL)
+	quit:$$$ISERR(sc) ""
+
+	set tr = ts.%Execute()
+	;do tr.%Display()
+	s i2b2Id = 0
+	while tr.%Next() {
+		#; set recId = tr.ID
+		; try to recieve fhir ID from ids table
+		; all records are different
+		#; set fhirId = ..getFhirRecordID(resourceName, tr."patient_num")
+
+		#; ;w "|"_fhirId_"|",!
+
+		#; if fhirId = "" {
+			; create record in ids table
+			; bad way !!!
+			set idsCls = ##class(I2B2onFHIR.Storage.Ids).%New()
+			set idsCls.resourceName = resourceName
+			set idsCls.fhirId = ##class(%SYSTEM.Util).CreateGUID()
+			set idsCls.i2b2Id = $i(i2b2Id)   //tr."patient_num"
+			set sc = idsCls.%Save()
+			if $$$ISERR(sc) w "Data saving error",!  q
+			set lastInsertId = idsCls.%Id()
+		
+		#; } else {
+		#; 	set lastInsertId = fhirId
+
+		#; }
+		#; ; check if we already have such record and remove it
+		#; s SQL = "DELETE FROM I2B2onFHIR_Storage.IdsLinks WHERE tableName = ? AND idsId = ?"
+		#; set ts = ##class(%SQL.Statement).%New()
+		#; set sc = ts.%Prepare(SQL)
+		#; quit:$$$ISERR(sc)
+		#; set tr2 = ts.%Execute(tableName, lastInsertId)
+
+		set idsLinksCls = ##class(I2B2onFHIR.Storage.IdsLinks).%New()
+		set idsLinksCls.idsId = lastInsertId
+		set idsLinksCls.tableName = tableName
+		set idsLinksCls.i2b2Link = $lb(tr."patient_num", tr."concept_cd", tr."modifier_cd", tr."start_date", tr."encounter_num", tr."instance_num", tr."provider_id")
+		set sc = idsLinksCls.%Save()
+		if $$$ISERR(sc) w "Data saving error",!  q
+	}
 }
 
 /// Returns %ID for record by resourceName AND I2B2ID

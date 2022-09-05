@@ -1,6 +1,8 @@
 Class I2B2onFHIR.Messages.ExportPatientSearch2FhirRequest Extends Ens.Request [ ProcedureBlock ]
 {
 
+Parameter ENDPOINT = "Patient";
+
 Property Identifier As %String(MAXLEN = "");
 
 Property BirthDate As %String(MAXLEN = "");

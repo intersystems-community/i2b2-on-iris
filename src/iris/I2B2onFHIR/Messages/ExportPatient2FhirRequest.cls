@@ -1,6 +1,8 @@
 Class I2B2onFHIR.Messages.ExportPatient2FhirRequest Extends Ens.Request [ ProcedureBlock ]
 {
 
+Parameter ENDPOINT = "Patient";
+
 Property Identifier As %String(MAXLEN = "");
 
 Property FileName As %String(MAXLEN = "") [ Calculated, SqlComputeCode = {Set {*} = "Patient-"_{Identifier}}, SqlComputed, Transient ];

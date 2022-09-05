@@ -1,15 +1,15 @@
 /// Base class for all transformations
-Class I2B2.FHIR.Transform.Practitioner Extends I2B2.FHIR.Transform.Base
+Class I2B2.FHIR.Transform.MedicationRequest Extends I2B2.FHIR.Transform.Base
 {
 
-ClassMethod Transform(source As I2B2.FHIR.Proxy.Practitioner, target As HS.FHIR.DTL.vR4.Model.Resource.Practitioner) As %Status
+ClassMethod Transform(source As I2B2.FHIR.Proxy.MedicationRequest, target As HS.FHIR.DTL.vR4.Model.Resource.MedicationRequest) As %Status
 {
 	s sc = $$$OK
 	try {
-		s target = ##class(HS.FHIR.DTL.vR4.Model.Resource.Practitioner).%New()
+		s target = ##class(HS.FHIR.DTL.vR4.Model.Resource.MedicationRequest).%New()
 		s target.id = source.ResourceId
 
-		s lookup = "I2B2.FHIR.Lookup.Practitioner"
+		s lookup = "I2B2.FHIR.Lookup.MedicationRequest"
 
 		// internal
 		s identifier = ##class(HS.FHIR.DTL.vR4.Model.Datatype.Identifier).%New()
@@ -28,23 +28,20 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Practitioner, target As HS.FHIR.
 			s coding.code = typeCodingCode
 			d identifier.typeNewObject().coding.Insert(coding)
 		}
-		i $tr(source.Provider.importdate, $c(0)) '= "" {
-			s identifier.periodNewObject().start = $e(source.Provider.importdate, 1, 10)
+		i $tr(source.ObservationFact.importdate, $c(0)) '= "" {
+			s identifier.periodNewObject().start = $e(source.ObservationFact.importdate, 1, 10)
 		}
 		d target.identifier.Insert(identifier)
 
-		// name
-		i (source.Provider.namechar '= "") {
-			s humanName = ##class(HS.FHIR.DTL.vR4.Model.Datatype.HumanName).%New()
-			s humanName.use = ..Lookup(lookup,"name_use")
-			s humanName.family = $ZSTRIP($p(source.Provider.namechar, ",", 1), "<>W")
-			s given = $ZSTRIP($p(source.Provider.namechar, ",", 2), "<>W")
-			d:given'="" humanName.given.Insert(given)
-			s suffix = $ZSTRIP($p(source.Provider.namechar, ",", 3), "<>W")
-			d:suffix'="" humanName.suffix.Insert(suffix)
-			d target.name.Insert(humanName)
-		}
+		#dim subject As HS.FHIR.DTL.vR4.Model.Base.Reference = ##class(HS.FHIR.DTL.vR4.Model.Base.Reference).%New()
+		s subject.reference = "Patient/"_##class(I2B2.FHIR.Proxy.Patient).getResourceIdByPatientId(source.ObservationFact.patientnum)
+		s target.subject = subject
 
+		// todo
+		s target.intent = "order"
+		s target.status = "active"
+		#dim medicationCodeableConcept As HS.FHIR.DTL.vR4.Model.Datatype.CodeableConcept = ##class(HS.FHIR.DTL.vR4.Model.Datatype.CodeableConcept).%New()
+		s target.medicationCodeableConcept = medicationCodeableConcept
 
 	} catch e {
 		s sc = e.AsStatus()

@@ -47,6 +47,8 @@ XData ProductionDefinition
   <Item Name="I2B2onFHIR.Operations.GetFHIR" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Adapter" Name="HTTPPort">52773</Setting>
     <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
+    <Setting Target="Adapter" Name="Credentials">FHIR</Setting>
+    <Setting Target="Adapter" Name="ResponseTimeout">9000</Setting>
   </Item>
 </Production>
 }

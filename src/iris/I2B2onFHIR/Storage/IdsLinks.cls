@@ -8,7 +8,9 @@ Property idsId As %String(MAXLEN = "");
 Property tableName As %String(MAXLEN = "");
 
 /// list with PK from table to link to the particular row
-Property i2b2Link As %String;
+Property i2b2Link As %String(MAXLEN = "");
+
+Index i2b2LinkIndex On i2b2Link;
 
 Storage Default
 {
