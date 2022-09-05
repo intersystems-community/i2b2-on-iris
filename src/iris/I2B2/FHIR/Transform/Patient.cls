@@ -7,14 +7,14 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Patient, target As HS.FHIR.DTL.v
 	s sc = $$$OK
 	try {
 		s target = ##class(HS.FHIR.DTL.vR4.Model.Resource.Patient).%New()
-		s target.id = source.PatientId
+		s target.id = source.ResourceId
 
 		s patientId = source.PatientId
 		s lookup = "I2B2.FHIR.Lookup.Patient"
 
 		// internal
 		s identifier = ##class(HS.FHIR.DTL.vR4.Model.Datatype.Identifier).%New()
-		s identifier.value = patientId
+		s identifier.value = source.ResourceId
 		s identifier.use = ..Lookup(lookup,"identifier_use")
 		s identifier.system = ..Lookup(lookup,"identifier_system")
 		s assignerDisplay = ..Lookup(lookup,"identifier_assigner_display")
@@ -83,7 +83,7 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Patient, target As HS.FHIR.DTL.v
 
 		// Patient.gender
 		s target.gender = ..convertGender(source.Patient.sexcd)
-		s target.gender = source.Patient.gender
+		// s target.gender = source.Patient.gender
 
 		// Patient.extension: patient-nationality
 		i $tr(source.Patient.racecd, $c(0)) '= "" {

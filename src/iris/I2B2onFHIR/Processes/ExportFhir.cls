@@ -19,11 +19,13 @@ Method OnRequest(pRequest As Ens.Request, Output pResponse As Ens.Response) As %
 	try {
 		s pResponse = ##class(Ens.Response).%New()
 
-		// Get patient
-		if pRequest.%IsA("I2B2onFHIR.Messages.ExportPatient2FhirRequest") {
+		// Get patient, practitioner, medication reqest
+		if pRequest.%IsA("I2B2onFHIR.Messages.ExportPatient2FhirRequest") 
+		   || pRequest.%IsA("I2B2onFHIR.Messages.ExportPractitioner2FhirRequest")
+		   || pRequest.%IsA("I2B2onFHIR.Messages.ExportMedicationRequest2FhirRequest") {
 			// Get FHIR
 			s getRequest = ##class(EnsLib.HTTP.GenericMessage).%New()
-			d getRequest.HTTPHeaders.SetAt(..#BASEURL_"Patient/"_pRequest.Identifier, "url")
+			d getRequest.HTTPHeaders.SetAt(..#BASEURL_pRequest.%GetParameter("ENDPOINT")_"/"_pRequest.Identifier, "url")
 			d getRequest.HTTPHeaders.SetAt("GET", "httprequest")
 			d getRequest.HTTPHeaders.SetAt(..#ACCEPTHEADER, "Accept")
 			s sc = ..SendRequestSync(..#DESTINATIONGETFHIR, getRequest, .getResponse)
@@ -41,7 +43,7 @@ Method OnRequest(pRequest As Ens.Request, Output pResponse As Ens.Response) As %
 		} elseif pRequest.%IsA("I2B2onFHIR.Messages.ExportPatientSearch2FhirRequest") {
 			// Get FHIR
 			s getRequest = ##class(EnsLib.HTTP.GenericMessage).%New()
-			d getRequest.HTTPHeaders.SetAt(..#BASEURL_"Patient/_search", "url")
+			d getRequest.HTTPHeaders.SetAt(..#BASEURL_pRequest.%GetParameter("ENDPOINT")_"/_search", "url")
 			// search params
 			s iparams=0
 			d:pRequest.Identifier'="" getRequest.HTTPHeaders.SetAt("identifier="_pRequest.Identifier, "IParams_"_$i(iparams))
@@ -57,6 +59,52 @@ Method OnRequest(pRequest As Ens.Request, Output pResponse As Ens.Response) As %
 			d:pRequest.Gender'="" getRequest.HTTPHeaders.SetAt("gender="_pRequest.Gender, "IParams_"_$i(iparams))
 			d:pRequest.Given'="" getRequest.HTTPHeaders.SetAt("given="_pRequest.Given, "IParams_"_$i(iparams))
 			d:pRequest.Family'="" getRequest.HTTPHeaders.SetAt("family="_pRequest.Family, "IParams_"_$i(iparams))
+			d getRequest.HTTPHeaders.SetAt(iparams, "iparams")
+
+			d getRequest.HTTPHeaders.SetAt(..#ACCEPTHEADER, "Accept")
+			s sc = ..SendRequestSync(..#DESTINATIONGETFHIR, getRequest, .getResponse)
+			q:$$$ISERR(sc)
+			i '$iso(getResponse)||'$iso(getResponse.Stream)||(getResponse.Stream.Size '> 0) {
+				s sc = $$$ERROR($$$GeneralError, "Empty response")
+				q
+			}
+			// Save FHIR to file
+			s saveRequest = ##class(Ens.StreamContainer).%New(getResponse.Stream)
+			s saveRequest.OriginalFilename = pRequest.FileName
+			s sc = ..SendRequestSync(..#DESTINATIONSAVEFHIR, saveRequest, .saveResponse)
+
+		// Search practitioner
+		} elseif pRequest.%IsA("I2B2onFHIR.Messages.ExportPractitionerSearch2FhirRequest") {
+			// Get FHIR
+			s getRequest = ##class(EnsLib.HTTP.GenericMessage).%New()
+			d getRequest.HTTPHeaders.SetAt(..#BASEURL_pRequest.%GetParameter("ENDPOINT")_"/_search", "url")
+			// search params
+			s iparams=0
+			d:pRequest.Identifier'="" getRequest.HTTPHeaders.SetAt("identifier="_pRequest.Identifier, "IParams_"_$i(iparams))
+			d:pRequest.Given'="" getRequest.HTTPHeaders.SetAt("given="_pRequest.Given, "IParams_"_$i(iparams))
+			d:pRequest.Family'="" getRequest.HTTPHeaders.SetAt("family="_pRequest.Family, "IParams_"_$i(iparams))
+			d getRequest.HTTPHeaders.SetAt(iparams, "iparams")
+
+			d getRequest.HTTPHeaders.SetAt(..#ACCEPTHEADER, "Accept")
+			s sc = ..SendRequestSync(..#DESTINATIONGETFHIR, getRequest, .getResponse)
+			q:$$$ISERR(sc)
+			i '$iso(getResponse)||'$iso(getResponse.Stream)||(getResponse.Stream.Size '> 0) {
+				s sc = $$$ERROR($$$GeneralError, "Empty response")
+				q
+			}
+			// Save FHIR to file
+			s saveRequest = ##class(Ens.StreamContainer).%New(getResponse.Stream)
+			s saveRequest.OriginalFilename = pRequest.FileName
+			s sc = ..SendRequestSync(..#DESTINATIONSAVEFHIR, saveRequest, .saveResponse)
+
+		// Search medication request
+		} elseif pRequest.%IsA("I2B2onFHIR.Messages.ExportMedicationRequestSearch2FhirRequest") {
+			// Get FHIR
+			s getRequest = ##class(EnsLib.HTTP.GenericMessage).%New()
+			d getRequest.HTTPHeaders.SetAt(..#BASEURL_pRequest.%GetParameter("ENDPOINT")_"/_search", "url")
+			// search params
+			s iparams=0
+			d:pRequest.Identifier'="" getRequest.HTTPHeaders.SetAt("identifier="_pRequest.Identifier, "IParams_"_$i(iparams))
 			d getRequest.HTTPHeaders.SetAt(iparams, "iparams")
 
 			d getRequest.HTTPHeaders.SetAt(..#ACCEPTHEADER, "Accept")

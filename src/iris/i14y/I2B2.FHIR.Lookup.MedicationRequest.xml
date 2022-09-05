@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="IRIS" version="26">
+<Document name="I2B2.FHIR.Lookup.MedicationRequest.LUT">
+<lookupTable>
+<entry table="I2B2.FHIR.Lookup.MedicationRequest" key="identifier_assigner_display">i2b2</entry>
+<entry table="I2B2.FHIR.Lookup.MedicationRequest" key="identifier_system"></entry>
+<entry table="I2B2.FHIR.Lookup.MedicationRequest" key="identifier_type_coding_code">PLAC</entry>
+<entry table="I2B2.FHIR.Lookup.MedicationRequest" key="identifier_type_coding_system">http://terminology.hl7.org/CodeSystem/v2-0203</entry>
+<entry table="I2B2.FHIR.Lookup.MedicationRequest" key="identifier_use">usual</entry>
+</lookupTable>
+</Document></Export>

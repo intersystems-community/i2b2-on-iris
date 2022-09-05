@@ -120,17 +120,40 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 
 	Set paramCount = $Select(pParameters="":0, 1:pParameters.Count())
 	Set columns = ..getSearchColumnsForType(pResourceType)
+	k arrJoin,arrFrom
+	s idExist=0
 	if $IsObject(columns) {
 		for ord = 1:1:paramCount {
 			#dim param as HS.FHIRServer.API.SearchQueryParameter = pParameters.GetAt(ord)
 			if param.name = "" continue
+			if (param.name = "_id") || (param.name = "identifier") { 
+				s idExist=1
+			}
 			if $D(..spcache(pResourceType, param.name), index) {
 				#dim column As I2B2.HS.FHIRServer.Storage.Json.SearchColumn = columns.GetAt(index)
-				i column.Join '= "" {
+				i column.Join '= "" && '$d(arrJoin(column.Join)) {
+					s arrJoin(column.Join)=""
 					s fromClause = fromClause_" LEFT JOIN "_column.TableName_" on "_column.Join
+				}
+				i column.From '= "" && '$d(arrFrom($e(column.From,1,250))) {
+					s arrFrom($e(column.From,1,250))=""
+					s fromClause = fromClause_" "_column.From
 				}
 			}		
 		}
+	}
+	i 'idExist {
+		if $D(..spcache(pResourceType, "_id"), index) {
+			s column = columns.GetAt(index)
+			i column.Join '= "" && '$d(arrJoin(column.Join)) {
+				s arrJoin(column.Join)=""
+				s fromClause = fromClause_" LEFT JOIN "_column.TableName_" on "_column.Join
+			}
+			i column.From '= "" && '$d(arrFrom($e(column.From,1,250))) {
+				s arrFrom($e(column.From,1,250))=""
+				s fromClause = fromClause_" "_column.From
+			}
+		}			
 	}
 	
 	set whereClause = ""
@@ -154,6 +177,7 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 		if param.nextInRevChain '= "" Continue
 		if param.nextInChain '= "" Continue
 		if param.searchParam = "" continue //We only want to union search parameters, not result parameters (like _sort)
+		
 		if $Find(param.value,",") {
 			if unionParamIndex = 0 {
 				// Remember which parameter we are union'ing
@@ -165,7 +189,6 @@ Method Search(pResourceType As %String, pCompartment As %String, pCompartmentId 
 			}
 		}
 	}	
-	
 	
 	for ord = 1:1:paramCount {
 		set param = pParameters.GetAt(ord)
@@ -306,10 +329,10 @@ Method getSearchColumnsForType(resourceType As %String) As %ListOfObjects(ELEMEN
 			}
 			//
 			Set ..spcache(resourceType) = columns
-		} elseif resourceType = "Practitioner" {
+		} elseif (resourceType = "Practitioner") || (resourceType = "MedicationRequest") {
 			Set columns = ##class(%ListOfObjects).%New()
 			//
-			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||PractitionerColumnsXData",,.sc)
+			Set columnsXData=##class(%Dictionary.CompiledXData).%OpenId(..%ClassName(1)_"||"_resourceType_"ColumnsXData",,.sc)
 			i $$$ISERR(sc) $$$ThrowStatus(sc)
 			s reader = ##class(%XML.Reader).%New()
 			s sc = reader.OpenStream(columnsXData.Data)
@@ -338,19 +361,29 @@ XData PatientColumnsXData
 <Columns>
 <SearchColumn>
 <ParamName>_id</ParamName>
-<ColumnName>patient_dimension.patient_num</ColumnName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
 <DataType>string</DataType>
 <Type>string</Type>
 <Added>0</Added>
 <TableName>patient_dimension</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=patient_dimension.patient_num 
+and I2B2onFHIR_storage.IdsLinks.tableName='patient_dimension'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 </SearchColumn>
 <SearchColumn>
 <ParamName>identifier</ParamName>
-<ColumnName>patient_dimension.patient_num</ColumnName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
 <DataType>string</DataType>
 <Type>string</Type>
 <Added>0</Added>
 <TableName>patient_dimension</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=patient_dimension.patient_num 
+and I2B2onFHIR_storage.IdsLinks.tableName='patient_dimension'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 </SearchColumn>
 <SearchColumn>
 <ParamName>birthdate</ParamName>
@@ -427,7 +460,7 @@ XData PatientColumnsXData
 </SearchColumn>
 <SearchColumn>
 <ParamName>gender</ParamName>
-<ColumnName>patient_dimension.gender</ColumnName>
+<ColumnName>replace(replace(sex_cd,'M','male'),'F','female')</ColumnName>
 <DataType>string</DataType>
 <Type>string</Type>
 <Added>0</Added>
@@ -475,19 +508,75 @@ XData PractitionerColumnsXData
 </SearchColumn>
 <SearchColumn>
 <ParamName>_id</ParamName>
-<ColumnName>provider_dimension.provider_path</ColumnName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
 <DataType>string</DataType>
 <Type>string</Type>
 <Added>0</Added>
 <TableName>provider_dimension</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=provider_dimension.provider_path 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=provider_dimension.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='provider_dimension'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 </SearchColumn>
 <SearchColumn>
 <ParamName>identifier</ParamName>
-<ColumnName>provider_dimension.provider_path</ColumnName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
 <DataType>string</DataType>
 <Type>string</Type>
 <Added>0</Added>
 <TableName>provider_dimension</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=provider_dimension.provider_path 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=provider_dimension.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='provider_dimension'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
+</SearchColumn>
+</Columns>
+}
+
+XData MedicationRequestColumnsXData
+{
+<Columns>
+<SearchColumn>
+<ParamName>_id</ParamName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>observation_fact</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=observation_fact.patient_num 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=observation_fact.concept_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 3)=observation_fact.modifier_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 4)=observation_fact.start_date
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 5)=observation_fact.encounter_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 6)=observation_fact.instance_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 7)=observation_fact.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='observation_fact'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
+</SearchColumn>
+<SearchColumn>
+<ParamName>identifier</ParamName>
+<ColumnName>I2B2onFHIR_storage.Ids.fhirId</ColumnName>
+<DataType>string</DataType>
+<Type>string</Type>
+<Added>0</Added>
+<TableName>observation_fact</TableName>
+<From>JOIN I2B2onFHIR_storage.IdsLinks
+on $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 1)=observation_fact.patient_num 
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 2)=observation_fact.concept_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 3)=observation_fact.modifier_cd
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 4)=observation_fact.start_date
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 5)=observation_fact.encounter_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 6)=observation_fact.instance_num
+and $LISTGET(I2B2onFHIR_storage.IdsLinks.i2b2Link, 7)=observation_fact.provider_id
+and I2B2onFHIR_storage.IdsLinks.tableName='observation_fact'
+JOIN I2B2onFHIR_storage.Ids 
+ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId</From>
 </SearchColumn>
 </Columns>
 }
@@ -497,6 +586,7 @@ Method getTableForResourceType(resourceType As %String) As %String
 {
 	q:resourceType="Patient" "patient_dimension"
 	q:resourceType="Practitioner" "provider_dimension"
+	q:resourceType="MedicationRequest" "observation_fact"
 	$$$ThrowFHIR($$$HSFHIRErrResourceTypeUnknown, resourceType)
 }
 
