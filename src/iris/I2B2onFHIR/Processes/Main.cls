@@ -88,7 +88,6 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 
                 if dataCreateResponse.patientNum'="" {
                     set patientsList(dataCreateResponse.patientNum) = ""
-                    m ^patientsList($i(^patientsList))=patientsList
                 }
                 
                 /// ??? delete record from data table anyway

@@ -3,9 +3,11 @@ Class I2B2onFHIR.Transformations.ObservationFact Extends I2B2onFHIR.Transformati
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
 {
+	;K ^tmpDBG
 	s sc = $$$OK
 	try {
 		$$$TRACE("ObservationFact Transform. Start")
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. Start")=""
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()	
 	
 		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visit_dimension""", "patient_num", source.patientNum, .ID)
@@ -46,20 +48,25 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		}	
 		$$$TRACE("ObservationFact Transform. 1")
 	
-
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. 1")=""
 
 		For Method = "AGE","DATEB","DATED","LANGUAGE","MARITAL","RACE","RELIGION","SEX","VITAL" {
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
 			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, counter, provider, concept, .record)
+			$$$TRACE("ObservationFact Transform. "_Method_" return "_ok)
+			;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
 			if $$$ISOK(ok) {
 				do target.data.Insert(record)
 			}
-		$$$TRACE("ObservationFact Transform. 2")
 		}
+		$$$TRACE("ObservationFact Transform. 2")
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. 2")=""
 	} catch e {
 		s sc = e.AsStatus()
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. Err")=sc
 	}
 	$$$TRACE("ObservationFact Transform. End")
+	;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. End")=""
 	q sc
 }
 
@@ -67,7 +74,9 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 ClassMethod AGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 	
+	
 	$$$TRACE("ObservationFact Transform. AGE")
+	
 	s record.patientnum = source.patientNum
 
 	s:$IsObject(patient) record.conceptcd="DEM|AGE:"_patient.ageinyearsnum		//concept.conceptcd_":"_patient.ageinyearsnum //???
@@ -127,7 +136,8 @@ ClassMethod DATEB(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="D"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in date of death: Patient_dimension.death_date
@@ -160,7 +170,8 @@ ClassMethod DATED(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="D"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in Patient_dimension.language_cd
@@ -193,7 +204,8 @@ ClassMethod LANGUAGE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pat
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in  Patient_dimension.language_cd
@@ -226,7 +238,8 @@ ClassMethod MARITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pati
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in  Patient_dimension.language_cd
@@ -259,7 +272,8 @@ ClassMethod RACE(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in  Patient_dimension.language_cd
@@ -292,7 +306,8 @@ ClassMethod RELIGION(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pat
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// for all patients
@@ -324,7 +339,8 @@ ClassMethod SEX(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
+	Q $$$OK
 }
 
 /// only for patients with a filled in Patient_dimension.vital_status_cd
@@ -356,7 +372,7 @@ ClassMethod VITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 	s record.updatedate=..CurrentDT()	//
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
-	s record.valueflagcd=""		//	Q $$$OK
+	s record.valueflagcd=""		//	
 	Q $$$OK
 }
 
