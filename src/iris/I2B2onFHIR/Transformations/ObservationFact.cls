@@ -216,7 +216,7 @@ ClassMethod MARITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pati
 	if $IsObject(patient),patient.languagecd = "" Q $$$ERROR("languagecd is empty")
 	s record.patientnum = source.patientNum
 
-	s:$IsObject(patient) record.conceptcd="DEM|MARITAL:"_patient.languagecd		//concept.conceptcd_":"_patient.ageinyearsnum //???
+	s:$IsObject(patient) record.conceptcd="DEM|MARITAL:"_patient.maritalstatuscd		//concept.conceptcd_":"_patient.ageinyearsnum //???
 	s:$IsObject(counter) record.encounternum=counter.encounternum 
 	s:$IsObject(provider) record.providerid=provider.providerid
 	s record.instancenum="1"
