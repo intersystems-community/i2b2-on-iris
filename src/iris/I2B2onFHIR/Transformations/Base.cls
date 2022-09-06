@@ -54,7 +54,7 @@ ClassMethod DownloadDate(json As %DynamicObject) As %Library.TimeStamp [ Private
 ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 {
 	// генерим автоматически, произвольный номер
-	set resourceType = jsonObj."resourceType"
+	set resourceType = json."resourceType"
 	if resourceType '= "" Q $I(^GenerateNum(resourceType))
 	Q $I(^GenerateNum)
 }
