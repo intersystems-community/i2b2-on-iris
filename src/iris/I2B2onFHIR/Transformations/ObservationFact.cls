@@ -46,10 +46,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		if ID > 0 {
 			set concept = ##class(public.conceptdimension).%OpenId(ID)
 		}	
-		$$$TRACE("ObservationFact Transform. 1")
+		$$$TRACE("ObservationFact Transform. DEMOGRAPHICS PART")
 	
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. 1")=""
-
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. DEMOGRAPHICS PART")=""
+		// DEMOGRAPHICS PART
 		For Method = "AGE","DATEB","DATED","LANGUAGE","MARITAL","RACE","RELIGION","SEX","VITAL" {
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
 			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, counter, provider, concept, .record)
@@ -59,8 +59,23 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 				do target.data.Insert(record)
 			}
 		}
-		$$$TRACE("ObservationFact Transform. 2")
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. 2")=""
+		$$$TRACE("ObservationFact Transform. PHI")
+		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. PHI")=""
+		
+		// PHI
+		
+		/*
+		*/
+		For Method = "FIRSTNAME","LASTNAME","MRN" {
+			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
+			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, counter, provider, concept, .record)
+			$$$TRACE("ObservationFact Transform. "_Method_" return "_ok)
+			;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
+			if $$$ISOK(ok) {
+				;do target.data.Insert(record)
+			}
+		}
+		
 	} catch e {
 		s sc = e.AsStatus()
 		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. Err")=sc
@@ -373,6 +388,104 @@ ClassMethod VITAL(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patien
 	s record.uploadid="" 		//
 	s record.valtypecd="T"		//
 	s record.valueflagcd=""		//	
+	Q $$$OK
+}
+
+ClassMethod FIRSTNAME(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
+{
+	$$$TRACE("ObservationFact Transform. FIRSTNAME")
+	
+	s record.patientnum = source.patientNum
+
+	s:$IsObject(patient) record.conceptcd="PHI:FNAME"
+	s:$IsObject(provider) record.providerid=provider.providerid
+	s record.instancenum="1"
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
+
+	S record.encounternum="-1"
+	s record.confidencenum=""	//
+	s record.downloaddate=""	//
+	s record.locationcd="@"		//
+	s record.modifiercd="@"	//
+	s record.nvalnum=""		//
+	s record.observationblob=""		//
+	s record.quantitynum=""		//
+	s record.sourcesystemcd="DEMOGRAPHIC|TEST"	//
+	s record.textsearchindex=""	//
+	s record.tvalchar=""		//
+	s record.unitscd="@"		//
+	s record.importdate=..CurrentDT()	//	
+	s record.updatedate=..CurrentDT()	//
+	s record.uploadid="" 		//
+	s record.valtypecd="N"		//
+	s record.valueflagcd=""		//
+
+	Q $$$OK
+}
+
+ClassMethod LASTNAME(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
+{
+	
+	$$$TRACE("ObservationFact Transform. LASTNAME")
+	
+	s record.patientnum = source.patientNum
+
+	s:$IsObject(patient) record.conceptcd="PHI:LNAME"
+	s:$IsObject(provider) record.providerid=provider.providerid
+	s record.instancenum="1"
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
+
+	S record.encounternum="-1"
+	s record.confidencenum=""	//
+	s record.downloaddate=""	//
+	s record.locationcd="@"		//
+	s record.modifiercd="@"	//
+	s record.nvalnum=""		//
+	s record.observationblob=""		//
+	s record.quantitynum=""		//
+	s record.sourcesystemcd="DEMOGRAPHIC|TEST"	//
+	s record.textsearchindex=""	//
+	s record.tvalchar=""		//
+	s record.unitscd="@"		//
+	s record.importdate=..CurrentDT()	//	
+	s record.updatedate=..CurrentDT()	//
+	s record.uploadid="" 		//
+	s record.valtypecd="N"		//
+	s record.valueflagcd=""		//
+	Q $$$OK
+}
+
+ClassMethod MRN(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient As public.patientdimension, counter As public.visitdimension, provider As public.providerdimension, concept As public.conceptdimension, Output record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
+{
+	$$$TRACE("ObservationFact Transform. MRN")
+	
+	s record.patientnum = source.patientNum
+
+	s:$IsObject(patient) record.conceptcd="PHI:MRN"
+	s:$IsObject(provider) record.providerid=provider.providerid
+	s record.instancenum="1"
+	s:$IsObject(counter) record.startdate = counter.startdate	//visit_dimension.start_date //???
+	s:$IsObject(counter) record.enddate = record.startdate		//observation_fact.start_date
+
+	S record.encounternum="-1"
+	s record.confidencenum=""	//
+	s record.downloaddate=""	//
+	s record.locationcd="@"		//
+	s record.modifiercd="@"	//
+	s record.nvalnum=""		//
+	s record.observationblob=""		//
+	s record.quantitynum=""		//
+	s record.sourcesystemcd="DEMOGRAPHIC|TEST"	//
+	s record.textsearchindex=""	//
+	s record.tvalchar=""		//
+	s record.unitscd="@"		//
+	s record.importdate=..CurrentDT()	//	
+	s record.updatedate=..CurrentDT()	//
+	s record.uploadid="" 		//
+	s record.valtypecd="N"		//
+	s record.valueflagcd=""		//
 	Q $$$OK
 }
 
