@@ -14,8 +14,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.enddate=$tr($p(dt,dlm,1,*-1),"T"," ")
         set target.importdate=..CurrentDT()
         set target.inoutcd=..InoutCD(source.json)
-        set target.lengthofstay=..LengthOfStay(source.json)
-        set target.locationcd=source.json.location.location.display
+        set target.locationcd=source.json.location."0".location.display
         set target.locationpath=""
         set refType = $p(source.json."subject"."reference", "/", 1)
         set refId = $p(source.json."subject"."reference", "/", 2)
@@ -26,6 +25,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set dlm = $e(t,9)
         set target.startdate=$tr($p(dt,dlm,1,*-1),"T"," ")
         set target.updatedate=..CurrentDT()
+        
+        set target.lengthofstay=..LengthOfStay(source.json,target.inoutcd,target.startdate,target.enddate)
         
         //Index visitdimensionpk On (encounternum, patientnum) [ PrimaryKey, SqlName = visit_dimension_pk, Type = index, Unique ];
         set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum),"visit_dimension") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
@@ -71,24 +72,68 @@ ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 	*/
 }
 
-ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]
+ClassMethod LengthOfStay(json As %DynamicObject, inoutcd As %String, startdate As %Library.TimeStamp, enddate As %Library.TimeStamp) As %Integer [ Private ]
 {
-	if json.classHistory.class="inpatient" {
-		//calc period from json.classHistory.period
-	}
-	Q 0
+	if inoutcd '= "Observation or Inpatient Hospital care",inoutcd '= "Inpatient" Q 0
+	if enddate = "" Q 1
+	set ed = $TR($P(enddate," "),"-/ ")	
+	set sd = $TR($P(startdate," "),"-/ ")
+	if ed=sd Q 1
+	Q ed-sd
 }
 
-ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
+ClassMethod InoutCD(json As %DynamicObject) As %String
 {
-	q ..Lookup("lookup.visitdimention.inout",json.status,"")
-	/*
-	I json.classHistory.class="inpatient" Q "IP"
-	I json.classHistory.class="outpatient" Q "OP"
-	I json.classHistory.class="ambulatory" Q "AV"
-	I json.classHistory.class="emergency" Q "ED"
-	Q ""
-	*/
+	;q ..Lookup("lookup.visitdimention.inout",json.status,"")
+	
+	;S ^tmpJSON($I(^tmpJSON))=json.%ToJSON()
+	//1) Encounter.class.code
+	S result = json.class.code
+	I result '= "" Q result
+	
+	//2) Encounter.extansion.[].display or code
+	
+	S urls("http://fhir.carevolution.com/codes/CPT/PatientClass")=1
+	S urls("http://careevolution.com/fhircodes#PatientClass")=2
+ 	S urls("http://fhir.carevolution.com/codes/NextGen/PatientClass")=3
+	S urls("http://fhir.carevolution.com/codes/FHIR-STU3/PatientClass")=4
+ 	S urls("http://fhir.carevolution.com/codes/FhirCodes/PatientClass")=5
+ 	S urls("http://fhir.carevolution.com/codes/Facets/PatientClass")=6
+ 	S urls("http://anthem.com/codes/CDA-CL_KHEALTH_M_KMDSYNTHETIC/PatientClass")=7
+  	S urls("urn:oid:1.2.840.114350.1.13.300.3.7.4.698084.30")=8
+	
+	S lbresult=$$RecursiveSearch(json,.urls)
+	
+	Q $lg(lbresult,2)
+	
+	
+RecursiveSearch(jsonObj,URLS)
+	I '$IsObject(jsonObj) Q ""
+	I jsonObj.system'="" {
+		S prio = +$G(URLS(jsonObj.system))
+		s value = jsonObj.display
+		I value="" {
+			s value = jsonObj.code
+		}
+		S result = $lb(prio,value)
+	}
+	else  {
+		S result = ""
+		S itr = jsonObj.%GetIterator()
+		while itr.%GetNext(.key,.obj) {
+			S tmpres=$$RecursiveSearch(obj,.URLS)
+			if result="" {
+				s result=tmpres
+			}
+			else  {
+				if $lg(tmpres,1)>0,$lg(tmpres,1)<$lg(result,1) {
+					s result=tmpres
+				}
+			}
+		}
+	}
+	
+	Q result
 }
 
 }

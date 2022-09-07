@@ -13,14 +13,14 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.ageinyearsnum = ..AgeInYearsNum(source.json)
         set target.languagecd = ..LanguageCD(source.json)
         set target.racecd = ..RaceCD(source.json) ;source.json.extension.extension.display
-        set target.maritalstatuscd = source.json.maritalStatus.text
+        set target.maritalstatuscd = source.json.maritalStatus.coding."0".display ;..MaritalStatusCD(source.json)  ;maritalStatus"]["coding"][0]["display"]
         set target.religioncd = ..ReligionCD(source.json) ;source.json.extension."valueCodeableConcept".coding.code
         set target.zipcd = source.json.address."0".postalCode
         set target.statecityzippath = ..StateCityZipPath(source.json)
         set target.incomecd = ""
         set target.patientblob = ""
         set target.updatedate = ..CurrentDT()
-        set target.downloaddate = ..DownloadDate(source.json)
+        set target.downloaddate = ..CurrentDT() ;..DownloadDate(source.json)
         set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
         
@@ -34,6 +34,14 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
+ClassMethod MaritalStatus(json As %DynamicObject) As %String [ Private ]
+{
+	s status = ""
+	if '$IsObject(json.maritalStatus) Q status
+	if '$IsObject(json.maritalStatus.coding) Q status
+	Q json.maritalStatus.coding."0".display
+}
+
 ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 {
 	set lang = ""
@@ -41,31 +49,42 @@ ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 	//source.json.communication.[].language.coding.[].display 
 	//source.json.communication.[].language.coding.[].code
 	//S ^tmpJSON($I(^tmpJSON))=json.%ToJSON()
-	
 	if '$IsObject(json.communication) Q lang
 	set itr = json.communication.%GetIterator()
 	while itr.%GetNext(.key,.val) {
 		if '$IsObject(val) continue
 		if '$IsObject(val.language) continue
 		//if 'val.preferred continue
-		set lang = val.language.text ;coding."0".code
+		//set lang = val.language.text ;coding."0".code
+		set lang = val.language.coding."0".display
 		if lang '= "" quit
 	}
-	
 	quit lang
 }
 
 ClassMethod RaceCD(json As %DynamicObject) As %String [ Private ]
 {
+	
+	/*
+	Patient.extension.extension.valueCoding.display
+	OR
+	Patient.extension.extension.valueString
+
+	Where "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"	
+	*/
+	
 	set race = ""
-	//extension.extension.display
+
 	if '$IsObject(json.extension) Q race
 	set itr = json.extension.%GetIterator()
 	while itr.%GetNext(.key,.val) {
 		if '$IsObject(val) continue
+		if val.url '= "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race" continue
 		if '$IsObject(val.extension) continue
 		set race = val.extension."0".valueCoding.display
-		if race '= "" 
+		if race '= "" Q
+		set race = val.extension."0".valueString
+		if race '= "" Q
 	}
 	Q race
 }
@@ -103,10 +122,9 @@ ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 	S birthday = json."birthDate"
 	I birthday="" Q 0
 	S birthday=$tr(birthday,"-/ ")
-	// нужно брать не "сейчас", а дату study date/first visit
-	//calculate from study date/first visit: 
-	//start_date.visit_dimension - Patient_dimension.birth_date
-	S now=$zdt(+$h,8)
+	S now = $p(json."meta"."lastUpdated","T")
+	S now=$tr(now,"-/ ")
+	S:now="" now=$zdt(+$h,8)
 	Q (now-birthday)\10000
 }
 
