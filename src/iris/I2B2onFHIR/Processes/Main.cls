@@ -35,7 +35,7 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
         // check resource type
         // skip unknown resources
-        if ",patient,encounter,practitioner,observation,"'[(","_resourceType_","){
+        if ",patient,encounter,practitioner,observation,condition,procedure,medicationrequest,"'[(","_resourceType_","){
             
             // generate error ???
             $$$TRACE("Unknown resource type "_resourceType)
@@ -97,6 +97,54 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
             }
         }
 
+
+        ; separate files, which are not connected with patients directly
+        ; there is no separate Process right now, because logic is simple
+        for dataType = "observation", "condition", "procedure", "medicationrequest" {
+            set SQL = "SELECT ID, content FROM I2B2onFHIR_Storage.data WHERE type = ?"
+            set ts2 = ##class(%SQL.Statement).%New()
+            set sc = ts2.%Prepare(SQL)
+            continue:$$$ISERR(sc)
+            set tr2 = ts2.%Execute(dataType)
+            while tr2.%Next() {
+                $$$TRACE(dataType)
+
+		        #dim observationFactTransformResponse As I2B2onFHIR.Messages.ObservationFactTransformResponse
+		
+                ; call transformation
+                if dataType = "observation" {
+                    set sc = ##class(I2B2onFHIR.Transformations.ObservationFile).Transform(pRequest, .observationFactTransformResponse)
+                
+                }elseif dataType = "condition" {
+                    set sc = ##class(I2B2onFHIR.Transformations.Condition).Transform(pRequest, .observationFactTransformResponse)
+
+                }elseif dataType = "procedure" {
+                    set sc = ##class(I2B2onFHIR.Transformations.Procedure).Transform(pRequest, .observationFactTransformResponse)
+
+                }elseif dataType = "medicationrequest" {
+                    set sc = ##class(I2B2onFHIR.Transformations.MedicationRequest).Transform(pRequest, .observationFactTransformResponse)
+
+                } else {
+                    $$$TRACE("Unknown file type "_dataType)
+                    continue
+                }
+
+                // skip empty messages
+                continue:observationFactTransformResponse.data.Count()<1
+
+                // 1 - check that record already exists 
+                #dim dataCheckResponse As I2B2onFHIR.Messages.dataCheckBaseResponse
+                s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .dataCheckResponse)
+                quit:$$$ISERR(sc)
+
+                // 2 - save new record
+                s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .resp)
+                quit:$$$ISERR(sc)
+            }
+        }
+
+
+
         #dim observationFactRequest As I2B2onFHIR.Messages.ObservationFactBPRequest
         // create/update observation fact
         set patientNum="" for { set patientNum = $o(patientsList(patientNum)) quit:patientNum=""
@@ -120,4 +168,3 @@ Storage Default
 }
 
 }
-
