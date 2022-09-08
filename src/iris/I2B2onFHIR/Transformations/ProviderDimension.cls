@@ -36,7 +36,7 @@ ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
 	
 	
-	set classcode=$g(^TempSaveData("practitioner",json.id),"class.code")
+	set classcode=$g(^TempSaveData("practitioner",json.id,"class.code"))
 	
 	
 	S $p(result,"\",2)="i2b2"

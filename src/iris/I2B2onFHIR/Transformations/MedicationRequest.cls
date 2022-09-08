@@ -1,14 +1,14 @@
-Class I2B2onFHIR.Transformations.ObservationFile Extends I2B2onFHIR.Transformations.Base
+Class I2B2onFHIR.Transformations.MedicationRequest Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
 {
-	;K ^tmpDBG
 	s sc = $$$OK
 	try {
-		set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()
+        set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()
+        
 		set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
-
+		
 		S record.encounternum="-1"
 		s record.patientnum = "-1"
 		s record.conceptcd=""
@@ -33,10 +33,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.textsearchindex=""	//
 		s record.importdate=..CurrentDT()	//	
 		s record.updatedate=..CurrentDT()	//
-		s record.uploadid=""
+		s record.uploadid=""	
 		
-		do target.data.Insert(record)
-	
+		do target.data.Insert(record)        
+
 	} catch e {
 		s sc = e.AsStatus()
 	}
