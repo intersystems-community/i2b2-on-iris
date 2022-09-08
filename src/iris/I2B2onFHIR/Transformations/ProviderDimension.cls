@@ -3,9 +3,9 @@ Class I2B2onFHIR.Transformations.ProviderDimension Extends I2B2onFHIR.Transforma
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ProviderDimensionTransformResponse) As %Status
 {
-	K ^tmpDBG
+	;K ^tmpDBG
 	s sc = $$$OK
-	S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Start")=source.json.%ToJSON()
+	;S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Start")=source.json.%ToJSON()
 	try {
         set target = ##class(I2B2onFHIR.Messages.ProviderDimensionTransformResponse).%New()
         set target.downloaddate=..CurrentDT()
@@ -17,15 +17,15 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploadid=..UploadId(source.json)
-       	S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Try is OK")=""
+       	;S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Try is OK")=""
 
 
 	} catch e {
 		s sc = e.AsStatus()
-		S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Err")=sc
+		;S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. Err")=sc
 
 	}
-	S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. End")=sc
+	;S ^tmpDBG($I(^tmpDBG),"ProviderDimension Transform. End")=sc
 	q sc
 }
 
