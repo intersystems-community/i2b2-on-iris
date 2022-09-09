@@ -28,10 +28,27 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.patientnum = ..getI2B2ID("patient", source.json.id,,"patient_dimension") //..UploadId(source.json)
         set target.uploadid = target.patientnum
 
+		do ..TempSaveData(source.json)
+		
 	} catch e {
 		s sc = e.AsStatus()
 	}
 	q sc
+}
+
+ClassMethod TempSaveData(json As %DynamicObject) As %Status [ Private ]
+{
+	
+	set resourceType = $zcvt(json."resourceType","L")
+	
+	S itr = json.identifier.%GetIterator()
+	while itr.%GetNext(.key,.value) {
+		I value.system '= "http://fhir.carevolution.com/identifiers/CareEvolution/MRN/CACode" continue
+	
+		S ^TempSaveData(resourceType,json.id)=""
+		S ^TempSaveData(resourceType,json.id,"mrn")=value.value
+	}
+	Q $$$OK
 }
 
 ClassMethod MaritalStatus(json As %DynamicObject) As %String [ Private ]

@@ -12,7 +12,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		S record.encounternum=..EncounterNum(source.json)
 		s record.patientnum = ..PatientNum(source.json)
 		s record.conceptcd=..ConceptCD(source.json)
-		s record.providerid=..ProviderID(source.json)
+		s record.providerid=..ProviderID()
 		s record.modifiercd=..ModifierCD(source.json)	
 		
 		set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
@@ -107,7 +107,7 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	S lookup.codecd = concept
 	S lookup.downloaddate=..CurrentDT()
 	s lookup.importdate=..CurrentDT()
-	s lookup.lookupblob=""
+	s lookup.lookupblob=foundObj.system
 	s lookup.namechar=foundObj.display
 	s lookup.sourcesystemcd=..SourceSystemCD(json)
 	s lookup.updatedate=..CurrentDT()
@@ -118,42 +118,12 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	Q concept
 }
 
-ClassMethod ProviderID(json As %DynamicObject) As %Library.String [ Private ]
-{
-	Q "1"
-}
-
 ClassMethod ModifierCD(json As %DynamicObject) As %Library.String [ Private ]
 {
 	S val = json.category."0".coding."0".display
 	I val'="" Q val
 	S val = json.category."0".coding."0".code
 	Q val
-	
-	
-	/*
-Необходимо сравнить полученное поле с существующими в таблицах: 
-1) modifier_dimension.name_char
-2) code_lookup.name_char WHERE column_cd= MODIFIER_CD
-
-Сюда нужно будет положить итоговый modifier_cd (если   найденное описание нашлось в таблице modifier_dimension ) или code_cd (если найденное описание нашлось в таблице code_lookup )
-
-Пример:
-Если Condition.category.coding.display= 'secondary', то он найдется в таблице code_lookup
-
-так как среди code_lookup.name_char при поставленной условии 'where ' есть  нужный code_lookup.name_char= 'secondary' 
-
-Пример IRIS запроса: 
-SELECT 
-table_cd, column_cd, code_cd, name_char, lookup_blob, upload_date, update_date, download_date, import_date, sourcesystem_cd, upload_id
-FROM "public".code_lookup
-
-where column_cd = 'MODIFIER_CD'
-Соответвественно в это поле ляжет итоговый code_lookup.code_cd = '2', то есть просто '2'
-
-В зависимости от того, в какой таблице нашлось данное поле, с той таблицей и необходимо связать это поле: modifier_dimension.modifier_cd или code_lookup.code_cd
-Если не нашлось совпадающего описания, то необходимо сделать новую запись в таблице code_lookup (см. вкладку code_lookup) и также связать с это поле с code_lookup.code_cd. 	
-	*/
 }
 
 }

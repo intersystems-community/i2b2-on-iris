@@ -29,7 +29,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		
 		// хардкод для демонстрации
 		#dim provider as public.providerdimension = ##class(public.providerdimension).%New()
-		set provider.providerid = 1
+		set provider.providerid = ..ProviderID()
 		
 		//#dim provider as public.providerdimension = $$$NULLOREF
 		/*if $IsObject(patient) {
@@ -526,7 +526,7 @@ ClassMethod MRN(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 	s record.quantitynum=""		//
 	s record.sourcesystemcd="DEMOGRAPHIC|TEST"	//
 	s record.textsearchindex=""	//
-	s record.tvalchar=""		//
+	s record.tvalchar=..GetMRN()		//
 	s record.unitscd="@"		//
 	s record.importdate=..CurrentDT()	//	
 	s record.updatedate=..CurrentDT()	//
@@ -534,6 +534,13 @@ ClassMethod MRN(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 	s record.valtypecd="N"		//
 	s record.valueflagcd=""		//
 	Q $$$OK
+}
+
+ClassMethod GetMRN(patientNum As %String) As %String [ Private ]
+{
+	&sql(select top(1) patient_ide INTO :id from "public"."patient_mapping" where patient_num = :patientNum )
+	I id = "" Q ""
+	Q $g(^TempSaveData("patient",id,"mrn"))
 }
 
 }

@@ -81,5 +81,11 @@ ClassMethod ProjectID(Output ID As %String) As %Status
 	q sc
 }
 
+ClassMethod ProviderID() As %Library.String [ Private ]
+{
+	&sql(select top(1) provider_id INTO :id from "public"."provider_dimension" )
+	Q id
+}
+
 }
 
