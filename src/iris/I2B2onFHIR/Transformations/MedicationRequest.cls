@@ -18,11 +18,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 			set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
 					 
 			s record.startdate = encounter.startdate
-			
-			set ok = $CLASSMETHOD(..%ClassName(1),method, .record)
-		
-			
-			do target.data.Insert(record)        
+			set ok = $CLASSMETHOD(..%ClassName(1),method, source.json, encounter, .record)
+			if $$$ISOK(ok) {
+				do target.data.Insert(record)
+			}        
         }
 
 	} catch e {
@@ -31,140 +30,141 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
-ClassMethod AT(ByRef record)
+ClassMethod AT(json As %DynamicObject, encounter As public.visitdimension, ByRef record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s record.modifiercd=..ModifierCD(source.json)
+		s record.modifiercd="@"
 		
 		s record.instancenum="1"		
-		s record.valtypecd="T"
+		s record.valtypecd=""
 		s record.tvalchar=""
 		s record.nvalnum=""
 		s record.valueflagcd=""
 		s record.quantitynum=""
-		s record.unitscd="@"
+		s record.unitscd=""
 		s record.confidencenum=""
-		s record.downloaddate=""
+		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
 		s record.sourcesystemcd=..SourceSystemCD(json)
 		s record.textsearchindex=""
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
+		
+		Q $$$OK
 }
 
-ClassMethod DOSE(ByRef record)
+ClassMethod DOSE(json As %DynamicObject, encounter As public.visitdimension, ByRef record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s record.modifiercd=..ModifierCD(source.json)
+		s record.modifiercd="MED:DOSE"
 		
 		s record.instancenum="1"		
 		s record.valtypecd="T"
-		s record.tvalchar=""
+		s record.tvalchar=..tValChar(json,record.modifiercd)
 		s record.nvalnum=""
 		s record.valueflagcd=""
 		s record.quantitynum=""
-		s record.unitscd="@"
+		
+		s unit = json.MedicationRequest.dosageInstruction.doseAndRate.low.code
+		
+		s record.unitscd=$S(unit'="":unit,1:"@")
 		s record.confidencenum=""
-		s record.downloaddate=""
+		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
 		s record.sourcesystemcd=..SourceSystemCD(json)
 		s record.textsearchindex=""
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
+		
+		Q $$$OK
 }
 
-ClassMethod FREQ(ByRef record)
+ClassMethod FREQ(json As %DynamicObject, encounter As public.visitdimension, ByRef record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s record.modifiercd=..ModifierCD(source.json)
+		s record.modifiercd="MED:FREQ"
 		
 		s record.instancenum="1"		
 		s record.valtypecd="T"
-		s record.tvalchar=""
+		s record.tvalchar=..tValChar(json,record.modifiercd)
 		s record.nvalnum=""
 		s record.valueflagcd=""
 		s record.quantitynum=""
-		s record.unitscd="@"
+		s record.unitscd=""
 		s record.confidencenum=""
-		s record.downloaddate=""
+		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
 		s record.sourcesystemcd=..SourceSystemCD(json)
 		s record.textsearchindex=""
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
+		
+		Q $$$OK
 }
 
-ClassMethod ROUTE(ByRef record)
+ClassMethod ROUTE(json As %DynamicObject, encounter As public.visitdimension, ByRef record As I2B2onFHIR.Messages.ObservationFactItem) As %Status [ Private ]
 {
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s record.modifiercd=..ModifierCD(source.json)
+		s record.modifiercd="MED:ROUTE"
 		
 		s record.instancenum="1"		
 		s record.valtypecd="T"
-		s record.tvalchar=""
+		s record.tvalchar=..tValChar(json,record.modifiercd)
 		s record.nvalnum=""
 		s record.valueflagcd=""
 		s record.quantitynum=""
-		s record.unitscd="@"
+		s record.unitscd=""
 		s record.confidencenum=""
-		s record.downloaddate=""
+		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
 		s record.sourcesystemcd=..SourceSystemCD(json)
 		s record.textsearchindex=""
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
+		
+		Q $$$OK
 }
 
-ClassMethod ModifierCD(json As %DynamicObject) As %Library.String [ Private ]
+ClassMethod tValChar(json As %DynamicObject, modifier As %String = "") As %Library.String [ Private ]
 {
-	S val = json.category."0".coding."0".display
-	I val'="" Q val
-	S val = json.category."0".coding."0".code
-	Q val
-}
-
-ClassMethod EncounterNum(json As %DynamicObject) As %Library.Integer [ Private ]
-{
-	s encId = $p(json.encounter.reference,"/",2)
-	&sql(select top(1) encounter_num INTO :num from "public"."encounter_mapping" where  encounter_ide = :encId )
-	Q num
-}
-
-ClassMethod PatientNum(json As %DynamicObject) As %Library.Integer [ Private ]
-{
-	s patId = $p(json.subject.reference,"/",2)
-	&sql(select top(1) patient_num INTO :num from "public"."patient_mapping" where  patient_ide = :patId )
-	Q num
+	S res = json.MedicationRequest.dosageInstruction.text
+	if modifier="MED:DOSE" Q res
+	if modifier="MED:FREQ" {
+		S val = json.MedicationRequest.dosageInstruction.timing.code.coding."0".display
+	}
+	elseif modifier="MED:ROUTE" {
+		s val=json.MedicationRequest.dosageInstruction.route.coding."0".display
+	}
+	else  {
+		s val=""
+	}
+	if val'="" s res=val
+	
+	Q res
 }
 
 ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 {
 	
-	set system("http://careevolution.com/fhircodes#DiagnosisCode")=$lb(6,"fhircodes")
-	set system("http://fhir.carevolution.com/codes/CTKDemo/CTKDemoProblemType")=$lb(7,"CTKDemo")
-	set system("http://fhir.carevolution.com/codes/DemoNamespace/DiagnosisCode")=$lb(8,"DemoNamespace")
-	set system("http://fhir.carevolution.com/codes/Horizon/DiagnosisCode")=$lb(9,"Horizon")
-	set system("http://fhir.carevolution.com/codes/Lourdes-Burlington-Invision-NS/DiagnosisCode")=$lb(10,"LBINS")
-	set system("http://fhir.carevolution.com/codes/z-SNOMED-DONOTUSE/DiagnosisCode")=$lb(4,"SNOMED")
-	set system("http://snomed.info/sct")=$lb(5,"Snomed")
-	set system("http://hl7.org/fhir/sid/icd-10")=$lb(1,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-10-cm")=$lb(2,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-9-cm")=$lb(3,"ICD9")
+	set system("http://hl7.org/fhir/sid/ndc")=$lb(1,"NDC")
+	set system("http://www.nlm.nih.gov/research/umls/rxnorm")=$lb(2,"RXNORM")
+	set system("http://fhir.carevolution.com/codes/z-RxNorm-DONOTUSE/OrderableItem")=$lb(3,"RXNORM")
+	set system("http://fhir.carevolution.com/codes/NextGen-NDC/OrderableItem")=$lb(4,"NDC")
 	
 	S foundObj=""
-	S itr = json.code.coding.%GetIterator()
+	S itr = json.medicationCodeableConcept.coding.%GetIterator()
 	while itr.%GetNext(.key,.obj) {
 		if obj.system'="",$d(system(obj.system)) {
 			if foundObj="" {

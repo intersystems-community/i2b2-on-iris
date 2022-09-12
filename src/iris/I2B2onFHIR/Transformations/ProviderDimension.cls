@@ -12,7 +12,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.importdate=..CurrentDT()
         set target.namechar=..NameChar(source.json)
         set target.providerblob=""
-        set target.providerid=..ProviderId(source.json)
+        set target.providerid=..ProviderID(source.json)
         set target.providerpath=..ProviderPath(source.json)
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
@@ -47,7 +47,7 @@ ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 	Q result
 }
 
-ClassMethod ProviderId(json As %DynamicObject) As %String [ Private ]
+ClassMethod ProviderID(json As %DynamicObject) As %String [ Private ]
 {
 	// Автоматически генерируем код следующим образом: 
 	//в начале символы 'LCS-I2B2:D0001090' затем какой-то набор чисел. 

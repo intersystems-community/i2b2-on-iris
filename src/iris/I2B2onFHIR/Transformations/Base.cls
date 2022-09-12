@@ -87,5 +87,19 @@ ClassMethod ProviderID() As %Library.String [ Private ]
 	Q id
 }
 
+ClassMethod EncounterNum(json As %DynamicObject) As %Library.Integer [ Private ]
+{
+	s encId = $p(json.encounter.reference,"/",2)
+	&sql(select top(1) encounter_num INTO :num from "public"."encounter_mapping" where  encounter_ide = :encId )
+	Q num
+}
+
+ClassMethod PatientNum(json As %DynamicObject) As %Library.Integer [ Private ]
+{
+	s patId = $p(json.subject.reference,"/",2)
+	&sql(select top(1) patient_num INTO :num from "public"."patient_mapping" where  patient_ide = :patId )
+	Q num
+}
+
 }
 
