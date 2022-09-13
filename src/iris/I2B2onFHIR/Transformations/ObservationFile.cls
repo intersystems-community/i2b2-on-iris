@@ -35,7 +35,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.updatedate=..CurrentDT()	//
 		s record.uploadid=""
 		
-		do target.data.Insert(record)
+		//do target.data.Insert(record)
 	
 	} catch e {
 		s sc = e.AsStatus()

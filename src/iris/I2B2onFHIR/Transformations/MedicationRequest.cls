@@ -183,7 +183,7 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	
 	S code = "%"_foundObj.code	
 	&sql(SELECT top(1) concept_cd INTO :concept FROM "public".concept_dimension where concept_cd LIKE :code)
-	if concept'="" Q concept
+	if $G(concept)'="" Q concept
 
 	s concept = $lg(system(foundObj.system),2)_":"_foundObj.code
 	

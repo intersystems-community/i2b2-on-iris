@@ -108,21 +108,28 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
             set tr2 = ts2.%Execute(dataType)
             while tr2.%Next() {
                 $$$TRACE(dataType)
+                
+                set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+                set transformRequest.json = jsonObj
 
 		        #dim observationFactTransformResponse As I2B2onFHIR.Messages.ObservationFactTransformResponse
 		
                 ; call transformation
                 if dataType = "observation" {
-                    set sc = ##class(I2B2onFHIR.Transformations.ObservationFile).Transform(pRequest, .observationFactTransformResponse)
+                    set sc = ##class(I2B2onFHIR.Transformations.ObservationFile).Transform(transformRequest, .observationFactTransformResponse)
+                    $$$TRACE("Transform status = "_sc)
                 
                 }elseif dataType = "condition" {
-                    set sc = ##class(I2B2onFHIR.Transformations.Condition).Transform(pRequest, .observationFactTransformResponse)
+                    set sc = ##class(I2B2onFHIR.Transformations.Condition).Transform(transformRequest, .observationFactTransformResponse)
+                    $$$TRACE("Transform status = "_sc)
 
                 }elseif dataType = "procedure" {
-                    set sc = ##class(I2B2onFHIR.Transformations.Procedure).Transform(pRequest, .observationFactTransformResponse)
+                    set sc = ##class(I2B2onFHIR.Transformations.Procedure).Transform(transformRequest, .observationFactTransformResponse)
+                    $$$TRACE("Transform status = "_sc)
 
                 }elseif dataType = "medicationrequest" {
-                    set sc = ##class(I2B2onFHIR.Transformations.MedicationRequest).Transform(pRequest, .observationFactTransformResponse)
+                    set sc = ##class(I2B2onFHIR.Transformations.MedicationRequest).Transform(transformRequest, .observationFactTransformResponse)
+                    $$$TRACE("Transform status = "_sc)
 
                 } else {
                     $$$TRACE("Unknown file type "_dataType)
@@ -135,10 +142,12 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 // 1 - check that record already exists 
                 #dim dataCheckResponse As I2B2onFHIR.Messages.dataCheckBaseResponse
                 s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .dataCheckResponse)
+                $$$TRACE("dataCheckResponse status = "_sc)
                 quit:$$$ISERR(sc)
 
                 // 2 - save new record
                 s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .resp)
+                $$$TRACE("Save New Record status = "_sc)
                 quit:$$$ISERR(sc)
             }
         }
@@ -168,3 +177,4 @@ Storage Default
 }
 
 }
+
