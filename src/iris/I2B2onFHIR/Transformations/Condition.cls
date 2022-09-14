@@ -9,22 +9,17 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()
         
 		set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
-		s ^tmpdbg=1
-		S ^tmpdbg("json")=source.json.%ToJSON()
 		S record.encounternum=..EncounterNum(source.json)
-		s ^tmpdbg=2
 		s record.patientnum = ..PatientNum(source.json)
 		s record.conceptcd=..ConceptCD(source.json)
 		s record.providerid=..ProviderID()
 		s record.modifiercd=..ModifierCD(source.json)	
-		s ^tmpdbg=3
 		set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
 				 
 		s record.startdate = encounter.startdate
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s ^tmpdbg=4
 		s record.instancenum="1"		
 		s record.valtypecd="T"
 		s record.tvalchar=""
@@ -40,7 +35,6 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
-		s ^tmpdbg=5
 		do target.data.Insert(record)        
 
 	} catch e {
