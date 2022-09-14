@@ -153,6 +153,10 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 s sc = ..SendRequestSync(..#OBSERVATIONFACTSAVE, observationFactTransformResponse, .resp)
                 $$$TRACE("Save New Record status = "_sc)
                 quit:$$$ISERR(sc)
+
+                /// ??? delete record from data table anyway
+                ///continue:$$$ISERR(sc)
+                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
             }
         }
 
