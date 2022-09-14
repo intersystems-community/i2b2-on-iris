@@ -15,6 +15,10 @@ Parameter TARGETPRACTITIONER = "Processes.Practitioner";
 
 Parameter TARGETOBSERVATIONFACT = "Processes.ObservationFact";
 
+Parameter OBSERVATIONFACTSAVE = "Operations.SaveDataToI2B2";
+
+Parameter OBSERVATIONFACTCHECK = "Operations.CheckDataInI2B2";
+
 Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Response) As %Status
 {
     s sc = $$$OK
@@ -141,12 +145,12 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
                 // 1 - check that record already exists 
                 #dim dataCheckResponse As I2B2onFHIR.Messages.dataCheckBaseResponse
-                s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .dataCheckResponse)
+                s sc = ..SendRequestSync(..#OBSERVATIONFACTCHECK, observationFactTransformResponse, .dataCheckResponse)
                 $$$TRACE("dataCheckResponse status = "_sc)
                 quit:$$$ISERR(sc)
 
                 // 2 - save new record
-                s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactTransformResponse, .resp)
+                s sc = ..SendRequestSync(..#OBSERVATIONFACTSAVE, observationFactTransformResponse, .resp)
                 $$$TRACE("Save New Record status = "_sc)
                 quit:$$$ISERR(sc)
             }
@@ -177,4 +181,3 @@ Storage Default
 }
 
 }
-
