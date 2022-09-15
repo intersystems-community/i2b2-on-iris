@@ -16,12 +16,20 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 			s record.providerid=..ProviderID()
 				
 			set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
-					 
+			if '$IsObject(encounter) s sc=$$$ERROR("Cannot open visit_dimension for encounter_num="_record.encounternum_" and patient_num="_record.patientnum) Q		 
+		 
 			s record.startdate = encounter.startdate
 			set ok = $CLASSMETHOD(..%ClassName(1),method, source.json, encounter, .record)
 			if $$$ISOK(ok) {
-				do target.data.Insert(record)
-			}        
+				s ok=record.%ValidateObject()
+				if $$$ISOK(ok) {
+					do target.data.Insert(record)
+				}
+				else  {
+					$$$LOGWARNING("MedicationRequest Transform. "_method_". %ValidateObject return "_$system.Status.GetErrorText(ok))
+				}				
+			}     
+			   
         }
 
 	} catch e {
@@ -164,6 +172,8 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	set system("http://fhir.carevolution.com/codes/NextGen-NDC/OrderableItem")=$lb(4,"NDC")
 	
 	S foundObj=""
+	if '$IsObject(json) Q ""
+	if '$IsObject(json.medicationCodeableConcept.coding) Q ""
 	S itr = json.medicationCodeableConcept.coding.%GetIterator()
 	while itr.%GetNext(.key,.obj) {
 		if obj.system'="",$d(system(obj.system)) {

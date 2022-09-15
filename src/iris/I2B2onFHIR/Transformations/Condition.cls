@@ -3,28 +3,22 @@ Class I2B2onFHIR.Transformations.Condition Extends I2B2onFHIR.Transformations.Ba
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
 {
-	k ^tmpdbg
 	s sc = $$$OK
 	try {
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()
         
 		set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
-		s ^tmpdbg=1
-		S ^tmpdbg("json")=source.json.%ToJSON()
 		S record.encounternum=..EncounterNum(source.json)
-		s ^tmpdbg=2
 		s record.patientnum = ..PatientNum(source.json)
 		s record.conceptcd=..ConceptCD(source.json)
 		s record.providerid=..ProviderID()
 		s record.modifiercd=..ModifierCD(source.json)	
-		s ^tmpdbg=3
 		set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
-				 
+		if '$IsObject(encounter) s sc=$$$ERROR("Cannot open visit_dimension for encounter_num="_record.encounternum_" and patient_num="_record.patientnum) Q		 
 		s record.startdate = encounter.startdate
 		s record.enddate = encounter.enddate
 		s record.locationcd = encounter.locationcd
 		
-		s ^tmpdbg=4
 		s record.instancenum="1"		
 		s record.valtypecd="T"
 		s record.tvalchar=""
@@ -33,19 +27,23 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.quantitynum=""
 		s record.unitscd="@"
 		s record.confidencenum=""
-		s record.downloaddate=""
+		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
 		s record.sourcesystemcd=..SourceSystemCD(source.json)
 		s record.textsearchindex=""
 		s record.importdate=..CurrentDT()	
 		s record.updatedate=..CurrentDT()
 		s record.uploadid=""
-		s ^tmpdbg=5
-		do target.data.Insert(record)        
+		s ok=record.%ValidateObject()
+		if $$$ISOK(ok) {
+			do target.data.Insert(record)  
+		}
+		else  {
+			$$$LOGWARNING("Condition Transform. %ValidateObject return "_$system.Status.GetErrorText(ok))
+		}      
 
 	} catch e {
 		s sc = e.AsStatus()
-		s ^tmpdbg("err")=sc
 	}
 	q sc
 }
@@ -65,6 +63,8 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	set system("http://hl7.org/fhir/sid/icd-9-cm")=$lb(3,"ICD9")
 	
 	S foundObj=""
+	if '$IsObject(json) Q ""
+	if '$IsObject(json.code.coding) Q ""
 	S itr = json.code.coding.%GetIterator()
 	while itr.%GetNext(.key,.obj) {
 		if obj.system'="",$d(system(obj.system)) {

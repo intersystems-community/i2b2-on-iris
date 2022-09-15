@@ -48,6 +48,12 @@ ClassMethod TempSaveData(json As %DynamicObject) As %Status [ Private ]
 		S ^TempSaveData(resourceType,json.id)=""
 		S ^TempSaveData(resourceType,json.id,"mrn")=value.value
 	}
+	
+	I '$IsObject(json.name) Q $$$OK
+	S ^TempSaveData(resourceType,json.id,"family")=json.name."0".family
+	
+	I '$IsObject(json.name."0".given) Q $$$OK
+	S ^TempSaveData(resourceType,json.id,"name")=json.name."0".given."0"
 	Q $$$OK
 }
 
