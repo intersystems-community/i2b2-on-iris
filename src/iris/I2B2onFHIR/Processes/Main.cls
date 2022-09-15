@@ -88,16 +88,16 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 #dim dataCreateResponse As I2B2onFHIR.Messages.dataCreateResponse
                 s sc = ..SendRequestSync(target, transformRequest, .dataCreateResponse)
                 
+                /// ??? delete record from data table anyway
+                ///continue:$$$ISERR(sc)
+                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
+               
                 continue:$$$ISERR(sc)
                 
                 if dataCreateResponse.patientNum'="" {
                     set patientsList(dataCreateResponse.patientNum) = ""
                 }
                 
-                /// ??? delete record from data table anyway
-                ///continue:$$$ISERR(sc)
-                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
-
             }
         }
 
@@ -137,9 +137,14 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
                 } else {
                     $$$TRACE("Unknown file type "_dataType)
+	                /// delete unknown file type record from data table
+	                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)                    
                     continue
                 }
 
+                /// ??? delete record from data table anyway
+                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
+				continue:$$$ISERR(sc)
                 // skip empty messages
                 continue:observationFactTransformResponse.data.Count()<1
 
@@ -147,16 +152,16 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
                 #dim dataCheckResponse As I2B2onFHIR.Messages.dataCheckBaseResponse
                 s sc = ..SendRequestSync(..#OBSERVATIONFACTCHECK, observationFactTransformResponse, .dataCheckResponse)
                 $$$TRACE("dataCheckResponse status = "_sc)
-                quit:$$$ISERR(sc)
+                continue:$$$ISERR(sc)
 
                 // 2 - save new record
                 s sc = ..SendRequestSync(..#OBSERVATIONFACTSAVE, observationFactTransformResponse, .resp)
                 $$$TRACE("Save New Record status = "_sc)
-                quit:$$$ISERR(sc)
+                continue:$$$ISERR(sc)
             }
         }
-
-
+		// WARNING!!! May be need correct!
+		s sc=$$$OK
 
         #dim observationFactRequest As I2B2onFHIR.Messages.ObservationFactBPRequest
         // create/update observation fact
@@ -181,3 +186,4 @@ Storage Default
 }
 
 }
+

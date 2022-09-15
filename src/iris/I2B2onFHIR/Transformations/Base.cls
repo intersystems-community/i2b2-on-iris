@@ -84,7 +84,7 @@ ClassMethod ProjectID(Output ID As %String) As %Status
 ClassMethod ProviderID() As %Library.String [ Private ]
 {
 	&sql(select top(1) provider_id INTO :id from "public"."provider_dimension" )
-	Q id
+	Q $G(id)
 }
 
 ClassMethod EncounterNum(json As %DynamicObject) As %Library.Integer [ Private ]

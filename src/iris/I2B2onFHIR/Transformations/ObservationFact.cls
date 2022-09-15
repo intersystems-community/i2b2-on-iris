@@ -79,7 +79,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
 			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, .record)
 			$$$TRACE("ObservationFact Transform. "_Method_" return "_ok)
-			S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
+			;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
 			if $$$ISOK(ok) {
 				s ok=record.%ValidateObject()
 				if $$$ISOK(ok) {
@@ -468,7 +468,7 @@ ClassMethod FIRSTNAME(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pa
 	s record.quantitynum=""		//
 	s record.sourcesystemcd="PHI|TEST"	//
 	s record.textsearchindex=""	//
-	s record.tvalchar="Patient.name.given"		// сделать аналогично GetMRN()
+	s record.tvalchar=$lg(..GetPatientData(record.patientnum),2)
 	s record.unitscd="@"		//
 	s record.importdate=..CurrentDT()	//	
 	s record.updatedate=..CurrentDT()	//
@@ -504,7 +504,7 @@ ClassMethod LASTNAME(source As I2B2onFHIR.Messages.ObservationFactBPRequest, pat
 	s record.quantitynum=""		//
 	s record.sourcesystemcd="PHI|TEST"	//
 	s record.textsearchindex=""	//
-	s record.tvalchar="Patient.name.family"		// сделать аналогично GetMRN()
+	s record.tvalchar=$lg(..GetPatientData(record.patientnum),3)
 	s record.unitscd="@"		//
 	s record.importdate=..CurrentDT()	//	
 	s record.updatedate=..CurrentDT()	//
@@ -538,7 +538,7 @@ ClassMethod MRN(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 	s record.quantitynum=""		//
 	s record.sourcesystemcd="PHI|TEST"	//
 	s record.textsearchindex=""	//
-	s record.tvalchar=..GetMRN()		//
+	s record.tvalchar=$lg(..GetPatientData(record.patientnum),1)		//
 	s record.unitscd="@"		//
 	s record.importdate=..CurrentDT()	//	
 	s record.updatedate=..CurrentDT()	//
@@ -548,11 +548,14 @@ ClassMethod MRN(source As I2B2onFHIR.Messages.ObservationFactBPRequest, patient 
 	Q $$$OK
 }
 
-ClassMethod GetMRN(patientNum As %String) As %String [ Private ]
+ClassMethod GetPatientData(patientNum As %String) As %List [ Private ]
 {
 	&sql(select top(1) patient_ide INTO :id from "public"."patient_mapping" where patient_num = :patientNum )
-	I id = "" Q ""
-	Q $g(^TempSaveData("patient",id,"mrn"))
+	I id = "" Q $lb()
+	S mrn=$g(^TempSaveData("patient",id,"mrn"))
+	S name=$g(^TempSaveData("patient",id,"name"))
+	S family=$g(^TempSaveData("patient",id,"family"))
+	Q $lb(mrn,name,family)
 }
 
 }
