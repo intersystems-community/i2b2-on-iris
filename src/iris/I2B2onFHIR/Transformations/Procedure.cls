@@ -12,7 +12,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.patientnum = ..PatientNum(source.json)
 		s record.conceptcd=..ConceptCD(source.json)
 		s record.providerid=..ProviderID()
-		s record.modifiercd=..ModifierCD(source.json)	
+		s record.modifiercd="@"	
 		set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
 		if '$IsObject(encounter) s sc=$$$ERROR("Cannot open visit_dimension for encounter_num="_record.encounternum_" and patient_num="_record.patientnum) Q		 
 		s record.startdate = encounter.startdate
@@ -51,16 +51,16 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 {
 	
-	set system("http://careevolution.com/fhircodes#DiagnosisCode")=$lb(6,"fhircodes")
-	set system("http://fhir.carevolution.com/codes/CTKDemo/CTKDemoProblemType")=$lb(7,"CTKDemo")
-	set system("http://fhir.carevolution.com/codes/DemoNamespace/DiagnosisCode")=$lb(8,"DemoNamespace")
-	set system("http://fhir.carevolution.com/codes/Horizon/DiagnosisCode")=$lb(9,"Horizon")
-	set system("http://fhir.carevolution.com/codes/Lourdes-Burlington-Invision-NS/DiagnosisCode")=$lb(10,"LBINS")
-	set system("http://fhir.carevolution.com/codes/z-SNOMED-DONOTUSE/DiagnosisCode")=$lb(4,"SNOMED")
-	set system("http://snomed.info/sct")=$lb(5,"Snomed")
-	set system("http://hl7.org/fhir/sid/icd-10")=$lb(1,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-10-cm")=$lb(2,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-9-cm")=$lb(3,"ICD9")
+	set system("http://anthem.com/codes/TNMCD/ProcedureCode")=$lb(9,"TNMCD")
+	set system("http://fhir.carevolution.com/codes/DemoNamespace/ProcedureCode")=$lb(8,"DemoNamespace")
+	set system("http://fhir.carevolution.com/codes/FHIR-STU3-SNOMED/ProcedureCode")=$lb(5,"SNOMED")
+	set system("http://fhir.carevolution.com/codes/ICD9/ProcedureCode")=$lb(1,"ICD9")
+	set system("http://fhir.carevolution.com/codes/NextGen-CPT4/ProcedureCode")=$lb(7,"CPT4")
+	set system("http://fhir.carevolution.com/codes/z-SNOMED-DONOTUSE/ProcedureCode")=$lb(6,"SNOMED")
+	set system("http://hl7.org/fhir/sid/icd-9-cm")=$lb(2,"ICD9")
+	set system("http://snomed.info/sct")=$lb(4,"SNOMED")
+	set system("http://www.cms.gov/Medicare/Coding/ICD10")=$lb(3,"ICD10")
+	set system("https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets")=$lb(10,"HCPCS")
 	
 	S foundObj=""
 	if '$IsObject(json) Q ""
@@ -106,14 +106,6 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	d lookup.%Save()
 
 	Q concept
-}
-
-ClassMethod ModifierCD(json As %DynamicObject) As %Library.String [ Private ]
-{
-	S val = json.category."0".coding."0".display
-	I val'="" Q val
-	S val = json.category."0".coding."0".code
-	Q val
 }
 
 }
