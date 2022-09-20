@@ -3,11 +3,9 @@ Class I2B2onFHIR.Transformations.ObservationFact Extends I2B2onFHIR.Transformati
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
 {
-	K ^tmpDBG
 	s sc = $$$OK
 	try {
 		$$$TRACE("ObservationFact Transform. Start")
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. Start")=""
         set target = ##class(I2B2onFHIR.Messages.ObservationFactTransformResponse).%New()	
 	
 		
@@ -17,30 +15,10 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		if ID > 0 {
 			set patient = ##class(public.patientdimension).%OpenId(ID)
 		}
-		
-		/*	
-		set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""visit_dimension""", "patient_num", source.patientNum, .ID)
-		if $$$ISERR(sc) Q
-		#dim counter as public.visitdimension = $$$NULLOREF
-		if ID > 0 {
-			set counter = ##class(public.visitdimension).%OpenId(ID)
-		}
-		*/
-		
-		// хардкод для демонстрации
+	
 		#dim provider as public.providerdimension = ##class(public.providerdimension).%New()
 		set provider.providerid = ..ProviderID()
-		
-		//#dim provider as public.providerdimension = $$$NULLOREF
-		/*if $IsObject(patient) {
-			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""provider_dimension""", "upload_id", patient.uploadid, .ID)
-		}
-		if $$$ISERR(sc) Q
-		if ID > 0 {
-			set provider = ##class(public.providerdimension).%OpenId(ID)
-		}
-		*/	
-		
+				
 		#dim concept as public.conceptdimension = $$$NULLOREF
 		if $IsObject(patient) {
 			set sc = ##class(I2B2onFHIR.Utils.Main).getIDfromTable("""public"".""concept_dimension""", "upload_id", patient.uploadid, .ID)
@@ -51,13 +29,11 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		}	
 		$$$TRACE("ObservationFact Transform. DEMOGRAPHICS PART")
 	
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. DEMOGRAPHICS PART")=""
 		// DEMOGRAPHICS PART
 		For Method = "AGE","DATEB","DATED","LANGUAGE","MARITAL","RACE","RELIGION","SEX","VITAL" {
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
 			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, provider, concept, .record)
 			$$$TRACE("ObservationFact Transform. "_Method_" return "_ok)
-			;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
 			if $$$ISOK(ok) {
 				s ok=record.%ValidateObject()
 				if $$$ISOK(ok) {
@@ -69,17 +45,13 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 			}
 		}
 		$$$TRACE("ObservationFact Transform. PHI")
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. PHI")=""
 		
 		// PHI
 		
-		/*
-		*/
 		For Method = "FIRSTNAME","LASTNAME","MRN" {
 			set record = ##class(I2B2onFHIR.Messages.ObservationFactItem).%New()
 			set ok = $CLASSMETHOD(..%ClassName(1),Method,source, patient, .record)
 			$$$TRACE("ObservationFact Transform. "_Method_" return "_ok)
-			;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. "_Method)=$lb(ok,record)
 			if $$$ISOK(ok) {
 				s ok=record.%ValidateObject()
 				if $$$ISOK(ok) {
@@ -93,10 +65,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.ObservationFactBPRequest, ta
 		
 	} catch e {
 		s sc = e.AsStatus()
-		;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. Err")=sc
 	}
 	$$$TRACE("ObservationFact Transform. End")
-	;S ^tmpDBG($I(^tmpDBG),"ObservationFact Transform. End")=""
 	q sc
 }
 

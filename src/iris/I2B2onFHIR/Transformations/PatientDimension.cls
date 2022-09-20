@@ -6,26 +6,25 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	s sc = $$$OK
 	try {
         set target = ##class(I2B2onFHIR.Messages.PatientDimensionTransformResponse).%New()
-        set target.sexcd = ..SexCD(source.json) //source.json."gender"
-        set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
+        set target.sexcd = ..SexCD(source.json)
+        set target.vitalstatuscd = ..VitalStatusCD(source.json)
         set target.birthdate = source.json."birthDate"
         set target.deathdate =  source.json."deceasedDateTime"
         set target.ageinyearsnum = ..AgeInYearsNum(source.json)
         set target.languagecd = ..LanguageCD(source.json)
-        set target.racecd = ..RaceCD(source.json) ;source.json.extension.extension.display
-        set target.maritalstatuscd = source.json.maritalStatus.coding."0".display ;..MaritalStatusCD(source.json)  ;maritalStatus"]["coding"][0]["display"]
-        set target.religioncd = ..ReligionCD(source.json) ;source.json.extension."valueCodeableConcept".coding.code
+        set target.racecd = ..RaceCD(source.json)
+        set target.maritalstatuscd = source.json.maritalStatus.coding."0".display
+        set target.religioncd = ..ReligionCD(source.json)
         set target.zipcd = source.json.address."0".postalCode
         set target.statecityzippath = ..StateCityZipPath(source.json)
         set target.incomecd = ""
         set target.patientblob = ""
         set target.updatedate = ..CurrentDT()
-        set target.downloaddate = ..CurrentDT() ;..DownloadDate(source.json)
+        set target.downloaddate = ..CurrentDT()
         set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
         
-        //Index patientdimensionpk On patientnum [ PrimaryKey, SqlName = patient_dimension_pk, Type = index, Unique ];
-        set target.patientnum = ..getI2B2ID("patient", source.json.id,,"patient_dimension") //..UploadId(source.json)
+        set target.patientnum = ..getI2B2ID("patient", source.json.id,,"patient_dimension")
         set target.uploadid = target.patientnum
 
 		do ..TempSaveData(source.json)
@@ -68,17 +67,11 @@ ClassMethod MaritalStatus(json As %DynamicObject) As %String [ Private ]
 ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 {
 	set lang = ""
-	//source.json.communication.[].language.text ??
-	//source.json.communication.[].language.coding.[].display 
-	//source.json.communication.[].language.coding.[].code
-	//S ^tmpJSON($I(^tmpJSON))=json.%ToJSON()
 	if '$IsObject(json.communication) Q lang
 	set itr = json.communication.%GetIterator()
 	while itr.%GetNext(.key,.val) {
 		if '$IsObject(val) continue
 		if '$IsObject(val.language) continue
-		//if 'val.preferred continue
-		//set lang = val.language.text ;coding."0".code
 		set lang = val.language.coding."0".display
 		if lang '= "" quit
 	}
@@ -87,15 +80,7 @@ ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
 
 ClassMethod RaceCD(json As %DynamicObject) As %String [ Private ]
 {
-	
-	/*
-	Patient.extension.extension.valueCoding.display
-	OR
-	Patient.extension.extension.valueString
-
-	Where "url": "http://hl7.org/fhir/us/core/StructureDefinition/us-core-race"	
-	*/
-	
+		
 	set race = ""
 
 	if '$IsObject(json.extension) Q race
@@ -115,7 +100,6 @@ ClassMethod RaceCD(json As %DynamicObject) As %String [ Private ]
 ClassMethod ReligionCD(json As %DynamicObject) As %String [ Private ]
 {
 	set religion = ""
-	//extension.valueCodeableConcept.coding.code
 	if '$IsObject(json.extension) Q religion
 	set itr = json.extension.%GetIterator()
 	while itr.%GetNext(.key,.val) {
@@ -135,7 +119,6 @@ ClassMethod SexCD(json As %DynamicObject) As %String [ Private ]
 
 ClassMethod VitalStatusCD(json As %DynamicObject) As %String [ Private ]
 {
-	//IF Patient.deceasedDateTime IS NOT NULL THEN 'N'
 	if json."deceasedDateTime" '= "" Q "N"
 	Q "Y"
 }
@@ -153,7 +136,6 @@ ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 
 ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
 {
-	//state\city\zip code\
 	S zip = json.address."0"."postalCode"
 	S city = json.address."0".city
 	S state = json.address."0".state

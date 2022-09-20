@@ -18,7 +18,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.locationpath=""
         set refType = $p(source.json."subject"."reference", "/", 1)
         set refId = $p(source.json."subject"."reference", "/", 2)
-        set target.patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId, 1,,"patient_dimension") //patient_mapping.patient_num 
+        set target.patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId, 1,,"patient_dimension")
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         S dt=source.json.period.start
         S t = $p(dt,"T",2)
@@ -28,9 +28,8 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         
         set target.lengthofstay=..LengthOfStay(source.json,target.inoutcd,target.startdate,target.enddate)
         
-        //Index visitdimensionpk On (encounternum, patientnum) [ PrimaryKey, SqlName = visit_dimension_pk, Type = index, Unique ];
-        set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum),"visit_dimension") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
-        set target.uploadid = target.encounternum //encounter_mapping.encounter_num 
+        set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum),"visit_dimension")
+        set target.uploadid = target.encounternum
         set target.visitblob=""
         
         do ..TempSaveData(source.json)
@@ -56,20 +55,7 @@ ClassMethod TempSaveData(json As %DynamicObject) As %Status [ Private ]
 
 ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 {
-	// переделал на Lookup
 	q ..Lookup("lookup.visitdimention.activestatus",json.status,"NULL",2)
-	/*
-	I json.status="planned" Q "PRELIMINARY"
-	I json.status="arrived" Q "ACTIVE"
-	I json.status="triaged" Q "ACTIVE"
-	I json.status="in-progress" Q "ACTIVE"
-	I json.status="onleave" Q "NULL"
-	I json.status="finished" Q "FINAL"
-	I json.status="cancelled" Q "NULL"
-	I json.status="entered-in-error" Q "NULL"
-	I json.status="unknown" Q "NULL"
-	Q "NULL"
-	*/
 }
 
 ClassMethod LengthOfStay(json As %DynamicObject, inoutcd As %String, startdate As %Library.TimeStamp, enddate As %Library.TimeStamp) As %Integer [ Private ]
@@ -84,14 +70,10 @@ ClassMethod LengthOfStay(json As %DynamicObject, inoutcd As %String, startdate A
 
 ClassMethod InoutCD(json As %DynamicObject) As %String
 {
-	;q ..Lookup("lookup.visitdimention.inout",json.status,"")
 	
-	;S ^tmpJSON($I(^tmpJSON))=json.%ToJSON()
-	//1) Encounter.class.code
 	S result = json.class.code
 	I result '= "" Q result
 	
-	//2) Encounter.extansion.[].display or code
 	
 	S urls("http://fhir.carevolution.com/codes/CPT/PatientClass")=1
 	S urls("http://careevolution.com/fhircodes#PatientClass")=2
