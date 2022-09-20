@@ -39,7 +39,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 			do target.data.Insert(record)  
 		}
 		else  {
-			$$$LOGWARNING("Condition Transform. %ValidateObject return "_$system.Status.GetErrorText(ok))
+			$$$LOGWARNING("ObservationFile Transform. %ValidateObject return "_$system.Status.GetErrorText(ok))
 		}      
 
 	} catch e {
@@ -69,7 +69,8 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	set system("http://loinc.org")=$lb(1,"LOINC")
 	set system("urn:oid:1.2.3.4.5.6.1.13.5.1.7.2.768282")=$lb(10,"oid:1.2.3.4.5.6.1.13.5.1.7.2.768282")	
 	
-	S foundObj=""
+	set foundObj=""
+	set lastObj=""
 	if '$IsObject(json) Q ""
 	if '$IsObject(json.code.coding) Q ""
 	S itr = json.code.coding.%GetIterator()
@@ -85,16 +86,23 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 			}
 			if $lg(system(foundObj.system),1) = 1 quit
 		}
+		S lastObj=obj
 	}
-	if foundObj="" Q ""
-	if foundObj.code="" Q ""
-	
-	S code = "%"_foundObj.code	
-	&sql(SELECT top(1) "concept_cd" INTO :concept FROM "public"."concept_dimension" where "concept_cd" LIKE :code)
-	if $g(concept)'="" Q concept
+	s concept = ""
+	if foundObj'="",foundObj.code'="" {
+		S code = "%"_foundObj.code	
+		&sql(SELECT top(1) "concept_cd" INTO :concept FROM "public"."concept_dimension" where "concept_cd" LIKE :code)
+		
+		if $g(concept)'="" QUIT concept
+		s concept = $lg(system(foundObj.system),2)_":"_foundObj.code
 
-	s concept = $lg(system(foundObj.system),2)_":"_foundObj.code
-	
+	}	
+	else  {
+		S foundObj=lastObj
+		S system=$S($F(foundObj.system,":"):$P(foundObj.system,":",2),1:foundObj.system)
+		I $E(system,1,2)="//" s system=$e(system,3,*)
+		s concept = system_":"_foundObj.code
+	}
 	//codelookuppk On (tablecd, columncd, codecd)
 	if ##class(public.codelookup).codelookuppkExists("OBSERVATION_FACT","CONCEPT_CD",concept) Q concept
 	

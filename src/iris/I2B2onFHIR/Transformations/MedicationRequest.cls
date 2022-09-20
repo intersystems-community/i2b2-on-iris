@@ -172,6 +172,7 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	set system("http://fhir.carevolution.com/codes/NextGen-NDC/OrderableItem")=$lb(4,"NDC")
 	
 	S foundObj=""
+	set lastObj=""
 	if '$IsObject(json) Q ""
 	if '$IsObject(json.medicationCodeableConcept.coding) Q ""
 	S itr = json.medicationCodeableConcept.coding.%GetIterator()
@@ -187,17 +188,24 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 			}
 			if $lg(system(foundObj.system),1) = 1 quit
 		}
+		S lastObj=obj
 	}
-	if foundObj="" Q ""
-	if foundObj.code="" Q ""
-	
-	S code = "%"_foundObj.code	
-	&sql(SELECT top(1) concept_cd INTO :concept FROM "public".concept_dimension where concept_cd LIKE :code)
-	if $G(concept)'="" Q concept
+	s concept = ""
+	if foundObj'="",foundObj.code'="" {
+		S code = "%"_foundObj.code	
+		&sql(SELECT top(1) "concept_cd" INTO :concept FROM "public"."concept_dimension" where "concept_cd" LIKE :code)
+		
+		if $g(concept)'="" QUIT concept
+		s concept = $lg(system(foundObj.system),2)_":"_foundObj.code
 
-	s concept = $lg(system(foundObj.system),2)_":"_foundObj.code
-	
-	//codelookuppk On (tablecd, columncd, codecd)
+	}	
+	else  {
+		S foundObj=lastObj
+		S system=$S($F(foundObj.system,":"):$P(foundObj.system,":",2),1:foundObj.system)
+		I $E(system,1,2)="//" s system=$e(system,3,*)
+		s concept = system_":"_foundObj.code
+	}
+		
 	if ##class(public.codelookup).codelookuppkExists("OBSERVATION_FACT","CONCEPT_CD",concept) Q concept
 	
 	s lookup = ##class(public.codelookup).%New()
