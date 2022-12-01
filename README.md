@@ -66,7 +66,7 @@ Steps below assume that you have `docker` and `docker-compose` in path, and your
 1. Clone/git pull the repo into any local directory
 
 ```
-$ git clone https://github.com/ELynx/i2b2-on-iris.git
+$ git clone https://gitlab.com/i3335/i2b2-on-iris
 ```
 
 2. Open the terminal in this directory and run:
