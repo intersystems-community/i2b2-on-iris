@@ -1,92 +1,116 @@
-# i2b2-on-iris
+# Proof-Of-Concept of I2B2 using IRIS as backend
 
+## Executive Summary
 
+InterSystems IRIS platform is a leading technical infrastructure used in production and research settings for Healthcare and Life Sciences.
 
-## Getting started
+The i2b2/Transmart community has implemented its query builder and underlying i2b2 core on top of three mainstream data sources - MS SQL Server, Oracle and Postgres.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This POC is focused on assessment and gap analysis for adding InterSystems IRIS as an additional data source. This would allow i2b2 clients to take advantage of the IRIS high-performance data querying capabilities as well as multitude of other features and functionality offered by IRIS.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## What & Why - Phase 1
 
-## Add your files
+### Phase 1 goals
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+    * Investigate compatibility of the i2b2 Query builder, i2b2 web and i2b2 core with IRIS backend and identify gaps preventing usage of the i2b2 Web client with IRIS back end.
+    * Determine steps necessary to mitigate compatibility gaps for i2b2 with IRIS backend.
+    * Develop a data migration path from i2b2 to IRIS.
+    * Execute direct SQL queries against i2b2 data in IRIS and achieve equivalence of the results with the results in the relational DB (Postgres) within limited POC scope. Capture and document the differences as well as steps to expand to a larger scope.
+    * Implement an infrastructure for exporting i2b2 patient data as FHIR resources, map and export sample resources (e.g. Patient, Meds) based on the data in the i2b2 instance.
+    * Document findings and publish to InterSystems open exchange.
+
+Phase 1 was completed, summary findings are in `Documentation i2b2 on Iris - Phase 1.pdf`
+
+### How Phase 1 was done
+
+Steps creating the project
+
+    1. Set up Linux VM.
+    2. Install and configure InterSystems IRIS for Health 2020.3 or higher on this VM.
+    3. Install and configure a reference i2b2 instance on the POC Linux VM with Postgres DB as a data source with a demo patient data set
+    4. Configure and test i2b2 Web client (query builder) with the Postgres DB as a data source.
+    5. Migrate i2b2 schema and demo patient data from the reference i2b2 instance into IRIS.
+    6. Create and execute several representative identical queries in IRIS SQL tool and in a Postgres SQL UI (PGAdmin). Compare results and document difference between I2B2 and IRIS.
+    7. Create and implement I2B2 - FHIR mapping for two representative FHIR resources (e.g. Patient, MedicationRequest) and demonstrate FHIR export for a few patients.
+    8. Create IRIS production to export patient data from IRIS as FHIR resources (e.g. by patient_id).
+    9. Document the process of implementation of I2B2 on IRIS.
+    10. Publish the implementation and documentation to InterSystems Open Exchange.
+
+## What & Why - Phase 2
+
+### Phase 2 goals
+
+    * Based on findings of Phase 1, provide i2b2-core-server variation that can use IRIS as database backend
+    * Provide fully dockerized test setup for i2b2 and IRIS, pre-configured for immediate use
+
+## Running IRIS with sample I2B2 dataset
+
+These steps are following instructions provided by InterSystems community.
+
+### Prerequisites
+
+Make sure you have [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) installed.
+
+Since Docker Desktop became paid application, we suggest you can actually use Docker Engine. There will be no "nice UI" though.
+
+For Windows, starting point for them is [here](https://docs.docker.com/engine/install/binaries/#install-server-and-client-binaries-on-windows).
+
+Get `docker-compose` executable [here](https://github.com/docker/compose/releases/).
+
+Make sure that you can run `docker run hello-world`. Remember CLI settings (like path and admin rights) and use them for this setup.
+
+Steps below assume that you have `docker` and `docker-compose` in path, and your CLI has admin rights to access service instance of `dockerd`. `dockerd` should be running as well.
+
+### Installation 
+
+1. Clone/git pull the repo into any local directory
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/i3335/i2b2-on-iris.git
-git branch -M main
-git push -uf origin main
+$ git clone https://github.com/ELynx/i2b2-on-iris.git
 ```
 
-## Integrate with your tools
+2. Open the terminal in this directory and run:
 
-- [ ] [Set up project integrations](https://gitlab.com/i3335/i2b2-on-iris/-/settings/integrations)
+```
+$ docker-compose build
+```
 
-## Collaborate with your team
+This step may take some time to complete, since FHIR packages are prepared. Up to 15 minutes may be necessary, depending on your machine power.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+3. Run the IRIS container with your project:
 
-## Test and Deploy
+```
+$ docker-compose up -d
+```
 
-Use the built-in continuous integration in GitLab.
+### How to Test it
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+On Docker host machine execute:
 
-***
+```
+$ curl -H "Accept: application/fhir+json" -X GET http://localhost:52773/i2b2/fhir/r4/Patient/1000000035
+```
 
-# Editing this README
+Expected response is:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!).  Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```json
+{"resourceType":"Patient","address":[{"city":"Braintree","country":"US","postalCode":"02185","state":"Massachusetts","type":"both","use":"home"}],"birthDate":"1988-01-20","communication":[{"language":{"coding":[{"code":"es","display":"spanish","system":"http://hl7.org/fhir/ValueSet/languages"}]},"preferred":true}],"deceasedBoolean":false,"extension":[{"url":"http://hl7.org/fhir/StructureDefinition/patient-nationality","valueCoding":{"code":"2186-5","display":"Not Hispanic or Latino","system":"http://terminology.hl7.org/CodeSystem/v3-Ethnicity"}},{"url":"http://hl7.org/fhir/StructureDefinition/patient-religion","valueCoding":{"code":"1007","display":"Atheism","system":"http://terminology.hl7.org/CodeSystem/v3-ReligiousAffiliation"}}],"gender":"male","id":"1000000035","identifier":[{"assigner":{"display":"i2b2"},"period":{"start":"2010-11-04"},"type":{"coding":[{"code":"PLAC","system":"http://terminology.hl7.org/CodeSystem/v2-0203"}]},"use":"usual","value":"1000000035"}],"maritalStatus":{"coding":[{"code":"U","display":"unmarried","system":"http://terminology.hl7.org/CodeSystem/v3-MaritalStatus"}]}}
+```
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Open `localhost:8082` in web browser supported by i2b2 web client. Expected outcome is i2b2-webclient login page, with pre-configured credentials for demo data.
 
-## Name
-Choose a self-explaining name for your project.
+Log in with pre-configured credentials, i2b2 query builder interface should be present. Notice prepared category tree.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Troubleshooting
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Q: `docker-compose build` output froze.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+A1: Try pressing Return key, sometimes console refresh is suspended.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+A2: Dataset import takes long time. This step would be cached by docker, if possible, so typically only one start-up is long.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Q: I get error `ERROR: Service 'iris' failed to build: Error processing tar file(exit status 1): write /usr/irissys/mgr/IRIS.DAT: no space left on device` or similar.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+Q: I get error `tar: data.gof: Wrote only ... of ... bytes tar: Exiting with failure status due to previous errors` or similar.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+A: Make sure that docker has enough free space for image creation. Use `prune` command to free up space. See `https://docs.docker.com/config/pruning/` for detailed instructions.
