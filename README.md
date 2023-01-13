@@ -114,3 +114,7 @@ Q: I get error `ERROR: Service 'iris' failed to build: Error processing tar file
 Q: I get error `tar: data.gof: Wrote only ... of ... bytes tar: Exiting with failure status due to previous errors` or similar.
 
 A: Make sure that docker has enough free space for image creation. Use `prune` command to free up space. See `https://docs.docker.com/config/pruning/` for detailed instructions.
+
+## Notice
+
+The project uses the intersystemsdc/irishealth-community:2022.1.1.374.0-zpm container. The license key in this container will expire on October 18, 2023.
