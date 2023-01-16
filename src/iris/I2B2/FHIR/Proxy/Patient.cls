@@ -23,7 +23,7 @@ ClassMethod getPatientId(pResourceId As %String) As %String
 {
 	set sql = "SELECT i2b2Link FROM I2B2onFHIR_storage.Ids LEFT JOIN I2B2onFHIR_storage.IdsLinks "_
 			  "ON I2B2onFHIR_storage.Ids.ID = I2B2onFHIR_storage.IdsLinks.idsId "_
-			  "where tableName='patient_dimension' and fhirId=?"
+			  "where tableName='patient_dimension' and i2b2Id=?"
 
 	set ts = ##class(%SQL.Statement).%New()
 	set sc=ts.%Prepare(sql)
@@ -133,3 +133,4 @@ Method Transform() As %Library.DynamicObject
 }
 
 }
+
