@@ -5,15 +5,25 @@ Parameter DESTINATIONSAVE = "Operations.SaveDataToI2B2";
 
 Parameter DESTINATIONCHECK = "Operations.CheckDataInI2B2";
 
-Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Output pResponse As Ens.Response) As %Status
+Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Output pResponse As I2B2onFHIR.Messages.dataCreateResponse) As %Status
 {
     set sc = $$$OK
     try {
+		set pResponse = ##class(I2B2onFHIR.Messages.dataCreateResponse).%New()
+
 		// encounter_mapping
+		$$$TRACE("Create encounter_mapping table")
 		// 1 - transform data
 		#dim encounterMappingTransformResponse As I2B2onFHIR.Messages.EncounterMappingTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.EncounterMapping).Transform(pRequest, .encounterMappingTransformResponse)
 		quit:$$$ISERR(sc)
+
+		// check whether we have a patient for this encounter or not
+        set refType = $p(pRequest.json."subject"."reference", "/", 1)
+        set refId = $p(pRequest.json."subject"."reference", "/", 2)
+        set patientnum = ##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId,1)
+		quit:patientnum="" /// patient not found - skip record
+		set pResponse.patientNum = patientnum
 
 
 		// 2 - check if we already have this data
@@ -31,6 +41,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 
 
 		// visit_dimension
+		$$$TRACE("Create visit_dimension table")
 		// 1 - transform data
 		#dim visitDimensionTransformResponse As I2B2onFHIR.Messages.VisitDimensionTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.VisitDimension).Transform(pRequest, .visitDimensionTransformResponse)

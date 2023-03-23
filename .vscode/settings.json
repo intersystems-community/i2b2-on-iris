@@ -28,6 +28,20 @@
         "username": "_SYSTEM",
         "password": "SYS"
       }
-    ]
+    ],
+	"objectscript.export": {
+        "folder": "src/iris",
+        "addCategory": false,
+        "map": {},
+        "atelier": true,
+        "generated": false,
+        "filter": "",
+        "exactFilter": "",
+        "category": "*",
+        "noStorage": false,
+        "dontExportIfNoChanges": false,
+        "maxConcurrentConnections": 0,
+        "mapped": true
+    },	
 
 }

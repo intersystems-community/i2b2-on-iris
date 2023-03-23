@@ -75,17 +75,15 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Patient, target As HS.FHIR.DTL.v
 		// Patient.deceased. deceasedBoolean
 		// Patient.deceased.deceasedDateTime
 		i $tr(source.Patient.deathdate, $c(0)) '= "" {
-			s target.deceasedBoolean = 1
+			//s target.deceasedBoolean = 1  // deceasedBoolean and deceasedDateTime cannot be both present
 			s target.deceasedDateTime = $e(source.Patient.deathdate, 1, 10)
 		} else {
 			s target.deceasedBoolean = 0
 		}
 
 		// Patient.gender
-		s sex = source.Patient.sexcd
-		s sex = ..Lookup("I2B2.FHIR.Lookup.Gender", sex)
-		s:sex="" sex = ..Lookup("I2B2.FHIR.Lookup.Gender", "unknown")
-		s target.gender = sex
+		s target.gender = ..convertGender(source.Patient.sexcd)
+		s target.gender = source.Patient.gender
 
 		// Patient.extension: patient-nationality
 		i $tr(source.Patient.racecd, $c(0)) '= "" {
@@ -165,7 +163,7 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Patient, target As HS.FHIR.DTL.v
 			s address.type = ..Lookup(lookup,"address_type")
 			s address.city = $p(statecityzippath, "\", 3)
 			s address.state = $p(statecityzippath, "\", 2)
-			s address.postalCode = $tr(source.Patient.zipcd, $c(0))
+			s address.postalCode = $p(statecityzippath, "\", 4)  //$tr(source.Patient.zipcd, $c(0))
 			s address.country = ..Lookup(lookup,"address_country")
 			d target.address.Insert(address)
 		}
@@ -174,6 +172,14 @@ ClassMethod Transform(source As I2B2.FHIR.Proxy.Patient, target As HS.FHIR.DTL.v
 		s sc = e.AsStatus()
 	}
 	q sc
+}
+
+/// Patient.gender
+ClassMethod convertGender(sex) As %String
+{
+	s sex = ..Lookup("I2B2.FHIR.Lookup.Gender", sex)
+	s:sex="" sex = ..Lookup("I2B2.FHIR.Lookup.Gender", "unknown")
+	return sex
 }
 
 }

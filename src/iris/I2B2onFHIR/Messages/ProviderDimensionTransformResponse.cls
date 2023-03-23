@@ -1,6 +1,7 @@
-Class I2B2onFHIR.Messages.providerDataTransformResponse Extends Ens.Response
+Class I2B2onFHIR.Messages.ProviderDimensionTransformResponse Extends Ens.Response
 {
 
+/// ??? UNUSED ???
 Property providerid As %Library.String(MAXLEN = 50) [ Required, SqlColumnNumber = 2, SqlFieldName = provider_id ];
 
 Property providerpath As %Library.String(MAXLEN = 700) [ Required, SqlColumnNumber = 3, SqlFieldName = provider_path ];
@@ -21,8 +22,8 @@ Property uploadid As %Library.Integer(MAXVAL = 2147483647, MINVAL = -2147483648)
 
 Storage Default
 {
-<Data name="providerDataTransformResponseDefaultData">
-<Subscript>"providerDataTransformResponse"</Subscript>
+<Data name="ProviderDimensionTransformResponseDefaultData">
+<Subscript>"ProviderDimensionTransformResponse"</Subscript>
 <Value name="1">
 <Value>providerid</Value>
 </Value>
@@ -51,8 +52,9 @@ Storage Default
 <Value>uploadid</Value>
 </Value>
 </Data>
-<DefaultData>providerDataTransformResponseDefaultData</DefaultData>
+<DefaultData>ProviderDimensionTransformResponseDefaultData</DefaultData>
 <Type>%Storage.Persistent</Type>
 }
 
 }
+

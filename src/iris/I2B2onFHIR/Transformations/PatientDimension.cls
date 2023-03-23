@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.PatientDimension Extends Ens.DataTransform
+Class I2B2onFHIR.Transformations.PatientDimension Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.PatientDimensionTransformResponse) As %Status
@@ -6,25 +6,25 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	s sc = $$$OK
 	try {
         set target = ##class(I2B2onFHIR.Messages.PatientDimensionTransformResponse).%New()
-        set target.sexcd = source.json."gender"
-        set target.patientnum = ..PatientNum(source.json) ;source.json
-        set target.vitalstatuscd = source.json."deceasedBoolean"
+        set target.sexcd = ..SexCD(source.json) //source.json."gender"
+        set target.patientnum =..getI2B2ID("patient", source.json."ID") //patient_mapping.patient_num //..PatientNum(source.json) ;source.json
+        set target.vitalstatuscd = ..VitalStatusCD(source.json) //source.json."deceasedBoolean"
         set target.birthdate = source.json."birthDate"
-        set target.deathdate = ..DeathDate(source.json) ;source.json
+        set target.deathdate =  source.json."deceasedDateTime"
         set target.ageinyearsnum = ..AgeInYearsNum(source.json)
-        set target.languagecd = ..LanguageCD(source.json)
-        set target.racecd = ..RaceCD(source.json)
-        set target.maritalstatuscd = ..MaritalStatusCD(source.json)
+        set target.languagecd = source.json.communication.language.text
+        set target.racecd = source.json.extension.extension.display
+        set target.maritalstatuscd = source.json.maritalStatus.text
         set target.religioncd = source.json.extension."valueCodeableConcept".coding.code
         set target.zipcd = source.json.address."postalCode"
         set target.statecityzippath = ..StateCityZipPath(source.json)
-        set target.incomecd = ..IncomeCD(source.json)
-        set target.patientblob = ..PatientBlob(source.json)
+        set target.incomecd = ""
+        set target.patientblob = ""
         set target.updatedate = ..CurrentDT()
         set target.downloaddate = ..DownloadDate(source.json)
         set target.importdate = ..CurrentDT()
         set target.sourcesystemcd = ..SourceSystemCD(source.json)
-        set target.uploadid = ..UploadId(source.json)
+        set target.uploadid = ..getI2B2ID("patient", source.json."ID") //..UploadId(source.json)
 
 	} catch e {
 		s sc = e.AsStatus()
@@ -32,33 +32,28 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
-ClassMethod UploadId(json As %DynamicObject) As %String [ Private ]
+ClassMethod SexCD(json As %DynamicObject) As %String [ Private ]
 {
-	//is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
-	Q ""
+	set sex = json."gender"
+	Q $select(sex = "Female":"F", sex = "Male":"M", 1:"")
 }
 
-ClassMethod SourceSystemCD(json As %DynamicObject) As %String [ Private ]
+ClassMethod VitalStatusCD(json As %DynamicObject) As %String [ Private ]
 {
-	//Demo in IRIS. we can put "Test"
-	Q "Test"
+	//IF Patient.deceasedDateTime IS NOT NULL THEN 'N'
+	if json."deceasedDateTime" '= "" Q "N"
+	Q "Y"
 }
 
-ClassMethod DownloadDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
+ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
 {
-	Q ""
-}
-
-ClassMethod PatientBlob(json As %DynamicObject) As %String [ Private ]
-{
-	//is empty in IRIS
-	Q ""
-}
-
-ClassMethod IncomeCD(json As %DynamicObject) As %String [ Private ]
-{
-	// пусто
-	Q ""
+	S birthday = json."birthDate"
+	S birthday=$tr(birthday,"-/ ")
+	// нужно брать не "сейчас", а дату study date/first visit
+	//calculate from study date/first visit: 
+	//start_date.visit_dimension - Patient_dimension.birth_date
+	S now=$zdt(+$h,8)
+	Q (now-birthday)\10000
 }
 
 ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
@@ -70,45 +65,5 @@ ClassMethod StateCityZipPath(json As %DynamicObject) As %String [ Private ]
 	Q state_"\"_city_"\"_zip
 }
 
-ClassMethod MaritalStatusCD(json As %DynamicObject) As %String [ Private ]
-{
-	Q ""
 }
 
-ClassMethod RaceCD(json As %DynamicObject) As %String [ Private ]
-{
-	Q ""
-}
-
-ClassMethod LanguageCD(json As %DynamicObject) As %String [ Private ]
-{
-	Q ""
-}
-
-ClassMethod AgeInYearsNum(json As %DynamicObject) As %Integer [ Private ]
-{
-	S birthday = json."birthDate"
-	S birthday=$tr(birthday,"-/ ")
-	// нужно брать не "сейчас", а дату study date/first visit
-	S now=$zdt(+$h,8)
-	Q (now-birthday)\10000
-}
-
-ClassMethod DeathDate(json As %DynamicObject) As %Library.TimeStamp [ Private ]
-{
-	Q ""
-}
-
-ClassMethod PatientNum(json As %DynamicObject) As %Integer [ Private ]
-{
-	// генерим автоматически, произвольный номер
-	Q $tr($now(),".,")
-}
-
-ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
-{
-	//update_date=import_date in IRIS
-	Q $zdt($h,3)
-}
-
-}

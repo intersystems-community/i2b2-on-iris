@@ -1,7 +1,19 @@
 Class I2B2onFHIR.Processes.Main Extends Ens.BusinessProcess [ ClassType = persistent ]
 {
 
+/*
+ToDo:
+Унаследуй трансформации от базового класса и вынеси туда общие методы
+*/
 Parameter DESTINATION = "Operations.SaveDataToI2B2";
+
+Parameter TARGETPATIENT = "Processes.Patient";
+
+Parameter TARGETENCOUNTER = "Processes.Encounter";
+
+Parameter TARGETPRACTITIONER = "Processes.Practitioner";
+
+Parameter TARGETOBSERVATIONFACT = "Process.ObservationFact";
 
 Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Response) As %Status
 {
@@ -17,74 +29,79 @@ Method OnRequest(pRequest As Ens.StreamContainer, Output pResponse As Ens.Respon
 
         ; check resource type
         set resourceType = jsonObj."resource"."resourceType"
-        ; maybe ther is difference
-        if (resourceType = "")  {
-        	set resourceType = jsonObj."resourceType"
-        }
-        
-        ; process resource type
-        if resourceType = "Patient" {
-            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
-            set transformRequest.json = jsonObj
+
+        set resourceType = $ZCVT(resourceType,"L")
+
+        // check resource type
+        // skip unknown resources
+        if ",patient,encounter,practitioner,observation_fact,"'[(","_resourceType_","){
             
-            set sc = ##class(I2B2onFHIR.Transformations.Patient).Transform(transformRequest, .transformResponse)
-            quit:$$$ISERR(sc)
-
-            //if we have no errors - save data
-            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
-
-
-        } elseif resourceType = "Procedure" {
-            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
-            set transformRequest.json = jsonObj
-            
-            set sc = ##class(I2B2onFHIR.Transformations.Procedure).Transform(transformRequest, .transformResponse)
-            quit:$$$ISERR(sc)
-
-            //if we have no errors - save data
-            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
-
-
-        } elseif resourceType = "Practitioner" {
-            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
-            set transformRequest.json = jsonObj
-            
-            set sc = ##class(I2B2onFHIR.Transformations.Practitioner).Transform(transformRequest, .transformResponse)
-            quit:$$$ISERR(sc)
-
-            //if we have no errors - save data
-            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
-
-        } elseif resourceType = "Encounter" {
-            set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
-            set transformRequest.json = jsonObj
-            
-            set sc = ##class(I2B2onFHIR.Transformations.Encounter).Transform(transformRequest, .transformResponse)
-            quit:$$$ISERR(sc)
-
-            //if we have no errors - save data
-            s sc = ..SendRequestSync(..#DESTINATION, transformResponse, .resp)
-
-        } elseif resourceType = "ExplanationOfBenefit" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
-
-        } elseif resourceType = "Condition" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
-
-        } elseif resourceType = "Claim" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
-
-        } elseif resourceType = "AuditEvent" {
-            s sc = $$$ERROR($$$GeneralError, "Not implemented yet")
-
-        } elseif resourceType = "" {
-            $$$TRACE("Empty resource type")
-            s sc = $$$ERROR($$$GeneralError, "Empty resource type")
-
-        } else {
+            // generate error ???
             $$$TRACE("Unknown resource type "_resourceType)
-            s sc = $$$ERROR($$$GeneralError, "Unknown resource type "_resourceType)
+            quit
+        }
 
+
+        // work with data storage
+        // 1 check that we do not have such record in the table
+        set sql = "SELECT %ID FROM I2B2onFHIR_Storage.data WHERE type = ? AND content = ?"
+        set ts = ##class(%SQL.Statement).%New()
+		set sc=ts.%Prepare(sql)
+		quit:$$$ISERR(sc)
+		set tr = ts.%Execute(resourceType, json)
+        if 'tr.%Next() {
+            
+            // 2 put new data to the storage
+            set SQL = "INSERT INTO I2B2onFHIR_Storage.data (type, content) VALUES (?, ?)"
+            set ts = ##class(%SQL.Statement).%New()
+            set sc = ts.%Prepare(SQL)
+            quit:$$$ISERR(sc)
+            set tr = ts.%Execute(resourceType, json)
+        }
+
+        set patientsList = ""
+        // 2 process records in particular order
+        for dataType = "patient", "encounter", "practitioner", "observation_fact" {
+            
+            set target = $s(dataType = "patient":..#TARGETPATIENT, dataType = "encounter":..#TARGETENCOUNTER, dataType = "practitioner":..#TARGETPRACTITIONER, 1:"")
+            continue:target=""
+
+
+            set SQL = "SELECT ID, content FROM I2B2onFHIR_Storage.data WHERE type = ?"
+            set ts2 = ##class(%SQL.Statement).%New()
+            set sc = ts2.%Prepare(SQL)
+            continue:$$$ISERR(sc)
+            set tr2 = ts2.%Execute(dataType)
+            while tr2.%Next() {
+                $$$TRACE(dataType_"|"_$e(tr2.content,1,100))
+
+                /// process data
+                set transformRequest = ##class(I2B2onFHIR.Messages.dataTransformRequestBase).%New()
+                set transformRequest.json = jsonObj
+
+                /// process data
+                #dim dataCreateResponse As I2B2onFHIR.Messages.dataCreateResponse
+                s sc = ..SendRequestSync(target, transformRequest, .dataCreateResponse)
+
+                if dataCreateResponse.patientNum'="" {
+                    set patientsList(dataCreateResponse.patientNum) = ""
+                }
+                
+                /// ??? delete record from data table anyway
+                ///continue:$$$ISERR(sc)
+                do ##class(I2B2onFHIR.Storage.Data).%DeleteId(tr2.ID)
+
+            }
+        }
+
+        #dim observationFactRequest As I2B2onFHIR.Messages.ObservationFactBPRequest
+        // create/update observation fact
+        set patientNum="" for { set patientNum = $o(patientsList(patientNum)) quit:patientNum=""
+            set observationFactRequest = ##class(I2B2onFHIR.Messages.ObservationFactBPRequest).%New()
+            set observationFactRequest.patientNum = patientNum
+            
+            s sc = ..SendRequestSync(..#TARGETOBSERVATIONFACT, observationFactRequest, .observationFactResponse)
+            quit:$$$ISERR(sc)
         }
 
 	} catch e {
@@ -99,4 +116,3 @@ Storage Default
 }
 
 }
-
