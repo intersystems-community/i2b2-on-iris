@@ -14,4 +14,9 @@ zn "IRISAPP"
 s Status=##Class(public.observationfact).%BuildIndices()
 I 'Status w !,"Error="_$SYSTEM.Status.GetErrorText(Status)
 
+
+w "Creating indexes",!
+do ##class(I2B2onFHIR.Utils.Main).generateLinksForTestData()
+w "Done",!
+
 halt

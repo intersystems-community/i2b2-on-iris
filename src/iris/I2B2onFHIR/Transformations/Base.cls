@@ -24,13 +24,11 @@ ClassMethod getI2B2ID(resourceName As %String = "", FHIRID As %String = "", i2b2
 
 ClassMethod CurrentDT() As %Library.TimeStamp [ Private ]
 {
-	//update_date=import_date in IRIS
 	Q $zdt($h,3)
 }
 
 ClassMethod UploadId(json As %DynamicObject) As %String [ Private ]
 {
-	//is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
 	Q ""
 }
 
@@ -42,7 +40,6 @@ ClassMethod SourceSystemCD(json As %DynamicObject) As %String [ Private ]
 
 ClassMethod IdeSource() As %String [ Private ]
 {
-	//Demo in IRIS. we can put "Test"
 	Q "care evolution"
 }
 
@@ -53,8 +50,7 @@ ClassMethod DownloadDate(json As %DynamicObject) As %Library.TimeStamp [ Private
 
 ClassMethod GenerateNum(json As %DynamicObject) As %Integer [ Private ]
 {
-	// генерим автоматически, произвольный номер
-	set resourceType = jsonObj."resourceType"
+	set resourceType = json."resourceType"
 	if resourceType '= "" Q $I(^GenerateNum(resourceType))
 	Q $I(^GenerateNum)
 }
@@ -79,6 +75,33 @@ ClassMethod ProjectID(Output ID As %String) As %Status
 		s sc = e.AsStatus()
 	}
 	q sc
+}
+
+ClassMethod ProviderID() As %Library.String [ Private ]
+{
+	&sql(select top(1) provider_id INTO :id from "public"."provider_dimension" )
+	Q $G(id)
+}
+
+ClassMethod EncounterNum(json As %DynamicObject) As %Library.Integer [ Private ]
+{
+	s encId = $p(json.encounter.reference,"/",2)
+	if encId'="" {
+		&sql(select top(1) encounter_num INTO :num from "public"."encounter_mapping" where  "encounter_ide" = :encId )
+	}
+	I $G(num)'="" Q $G(num)
+	s patId = $p(json.subject.reference,"/",2)
+	if patId'="" {
+		&sql(select top(1) encounter_num INTO :num from "public"."encounter_mapping" where  "patient_ide" = :patId )
+	}
+	Q $G(num)
+}
+
+ClassMethod PatientNum(json As %DynamicObject) As %Library.Integer [ Private ]
+{
+	s patId = $p(json.subject.reference,"/",2)
+	&sql(select top(1) patient_num INTO :num from "public"."patient_mapping" where  patient_ide = :patId )
+	Q $G(num)
 }
 
 }

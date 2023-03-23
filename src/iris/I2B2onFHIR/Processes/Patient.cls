@@ -18,7 +18,8 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.dataTransformRequestBase, Outpu
 		set sc = ##class(I2B2onFHIR.Transformations.PatientMaping).Transform(pRequest, .patientMappingTransformResponse)
 		quit:$$$ISERR(sc)
 
-		set pResponse.patientNum = patientMappingTransformResponse.patientnum
+		//set pResponse.patientNum = patientMappingTransformResponse.patientnum
+		set pResponse.patientNum = ""
 
 		// 2 - check if we already have this data
 		#dim dataCheckResponse As I2B2onFHIR.Messages.dataCheckBaseResponse
@@ -63,3 +64,4 @@ Storage Default
 }
 
 }
+

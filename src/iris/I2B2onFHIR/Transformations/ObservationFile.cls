@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Transformations.Condition Extends I2B2onFHIR.Transformations.Base
+Class I2B2onFHIR.Transformations.ObservationFile Extends I2B2onFHIR.Transformations.Base
 {
 
 ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ObservationFactTransformResponse) As %Status
@@ -12,7 +12,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.patientnum = ..PatientNum(source.json)
 		s record.conceptcd=..ConceptCD(source.json)
 		s record.providerid=..ProviderID()
-		s record.modifiercd=..ModifierCD(source.json)	
+		s record.modifiercd="@"	
 		set encounter = ##class(public.visitdimension).visitdimensionpkOpen(record.encounternum,record.patientnum)
 		if '$IsObject(encounter) s sc=$$$ERROR("Cannot open visit_dimension for encounter_num="_record.encounternum_" and patient_num="_record.patientnum) Q		 
 		s record.startdate = encounter.startdate
@@ -20,12 +20,12 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 		s record.locationcd = encounter.locationcd
 		
 		s record.instancenum="1"		
-		s record.valtypecd="T"
-		s record.tvalchar=""
-		s record.nvalnum=""
-		s record.valueflagcd=""
+		s record.valtypecd="N"
+		s record.tvalchar="E"
+		s record.nvalnum=source.json.valueQuantity.code
+		s record.valueflagcd=..ValueFlag(source.json)
 		s record.quantitynum=""
-		s record.unitscd="@"
+		s record.unitscd=source.json.valueQuantity.code
 		s record.confidencenum=""
 		s record.downloaddate=..CurrentDT()
 		s record.observationblob=""
@@ -39,7 +39,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 			do target.data.Insert(record)  
 		}
 		else  {
-			$$$LOGWARNING("Condition Transform. %ValidateObject return "_$system.Status.GetErrorText(ok))
+			$$$LOGWARNING("ObservationFile Transform. %ValidateObject return "_$system.Status.GetErrorText(ok))
 		}      
 
 	} catch e {
@@ -48,21 +48,28 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 	q sc
 }
 
+ClassMethod ValueFlag(json As %DynamicObject) As %Library.String [ Private ]
+{
+	if '$IsObject(json.interpretation) Q ""
+	if '$IsObject(json.interpretation."0".coding) Q ""
+	Q json.interpretation."0".coding."0".display
+}
+
 ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 {
 	
-	set system("http://careevolution.com/fhircodes#DiagnosisCode")=$lb(6,"fhircodes")
-	set system("http://fhir.carevolution.com/codes/CTKDemo/CTKDemoProblemType")=$lb(7,"CTKDemo")
-	set system("http://fhir.carevolution.com/codes/DemoNamespace/DiagnosisCode")=$lb(8,"DemoNamespace")
-	set system("http://fhir.carevolution.com/codes/Horizon/DiagnosisCode")=$lb(9,"Horizon")
-	set system("http://fhir.carevolution.com/codes/Lourdes-Burlington-Invision-NS/DiagnosisCode")=$lb(10,"LBINS")
-	set system("http://fhir.carevolution.com/codes/z-SNOMED-DONOTUSE/DiagnosisCode")=$lb(4,"SNOMED")
-	set system("http://snomed.info/sct")=$lb(5,"Snomed")
-	set system("http://hl7.org/fhir/sid/icd-10")=$lb(1,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-10-cm")=$lb(2,"ICD10")
-	set system("http://hl7.org/fhir/sid/icd-9-cm")=$lb(3,"ICD9")
+	set system("http://anthem.com/codes/TNMCD/ProcedureCode")=$lb(4,"TNMCD")
+	set system("http://fhir.carevolution.com/codes/DemoNamespace/LabObservationType")=$lb(5,"DemoNamespace")
+	set system("http://fhir.carevolution.com/codes/HolyCross-Meditech-NS/LabObservationType")=$lb(6,"HCMNS")
+	set system("http://fhir.carevolution.com/codes/Lourdes-Burlington-Sunquest-NS/LabObservationType")=$lb(7,"LBSNS")
+	set system("http://fhir.carevolution.com/codes/Lourdes-Camden-Sunquest-NS/LabObservationType")=$lb(8,"LCSNS")
+	set system("http://fhir.carevolution.com/codes/Lourdes-Sunquest-NS-HL7-2-3/LabObservationType")=$lb(9,"LSNS")
+	set system("http://fhir.carevolution.com/codes/NextGen-LabCorp/LabObservationType")=$lb(3,"NextGen")
+	set system("http://fhir.carevolution.com/codes/z-LOINC-DONOTUSE/LabObservationType")=$lb(2,"LOINC")
+	set system("http://loinc.org")=$lb(1,"LOINC")
+	set system("urn:oid:1.2.3.4.5.6.1.13.5.1.7.2.768282")=$lb(10,"oid:1.2.3.4.5.6.1.13.5.1.7.2.768282")	
 	
-	S foundObj=""
+	set foundObj=""
 	set lastObj=""
 	if '$IsObject(json) Q ""
 	if '$IsObject(json.code.coding) Q ""
@@ -79,7 +86,7 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 			}
 			if $lg(system(foundObj.system),1) = 1 quit
 		}
-			S lastObj=obj
+		S lastObj=obj
 	}
 	s concept = ""
 	if foundObj'="",foundObj.code'="" {
@@ -96,7 +103,7 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 		I $E(system,1,2)="//" s system=$e(system,3,*)
 		s concept = system_":"_foundObj.code
 	}
-	
+	//codelookuppk On (tablecd, columncd, codecd)
 	if ##class(public.codelookup).codelookuppkExists("OBSERVATION_FACT","CONCEPT_CD",concept) Q concept
 	
 	s lookup = ##class(public.codelookup).%New()
@@ -114,14 +121,6 @@ ClassMethod ConceptCD(json As %DynamicObject) As %Library.String [ Private ]
 	d lookup.%Save()
 
 	Q concept
-}
-
-ClassMethod ModifierCD(json As %DynamicObject) As %Library.String [ Private ]
-{
-	S val = json.category."0".coding."0".display
-	I val'="" Q val
-	S val = json.category."0".coding."0".code
-	Q val
 }
 
 }

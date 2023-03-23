@@ -31,7 +31,7 @@ XData ProductionDefinition
   </Item>
   <Item Name="Processes.Encounter" Category="" ClassName="I2B2onFHIR.Processes.Encounter" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
   </Item>
-  <Item Name="Processes.Practitioner" Category="" ClassName="I2B2onFHIR.Processes.Practitioner" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="Processes.Practitioner" Category="" ClassName="I2B2onFHIR.Processes.Practitioner" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
   </Item>
   <Item Name="Operations.CheckDataInI2B2" Category="" ClassName="I2B2onFHIR.Operations.CheckDataInI2B2" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
     <Setting Target="Host" Name="ArchiveIO">1</Setting>
@@ -47,8 +47,6 @@ XData ProductionDefinition
   <Item Name="I2B2onFHIR.Operations.GetFHIR" Category="" ClassName="EnsLib.HTTP.GenericOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Adapter" Name="HTTPPort">52773</Setting>
     <Setting Target="Adapter" Name="HTTPServer">localhost</Setting>
-    <Setting Target="Adapter" Name="Credentials">FHIR</Setting>
-    <Setting Target="Adapter" Name="ResponseTimeout">9000</Setting>
   </Item>
 </Production>
 }

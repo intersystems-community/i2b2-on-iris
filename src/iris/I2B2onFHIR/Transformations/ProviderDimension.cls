@@ -10,7 +10,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.importdate=..CurrentDT()
         set target.namechar=..NameChar(source.json)
         set target.providerblob=""
-        set target.providerid=..ProviderId()
+        set target.providerid=..ProviderID(source.json)
         set target.providerpath=..ProviderPath(source.json)
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
@@ -19,18 +19,16 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 
 	} catch e {
 		s sc = e.AsStatus()
+
 	}
 	q sc
 }
 
 ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 {
-	//Concat:('\i2b2\Providers\', Encounter.class.code, '\' , provider_dimension.name_char, '\')
-	//A string representing the unique position of a provider in a hierarchical department tree.
-	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
 	
 	
-	set classcode=$g(^TempSaveData("practitioner",json.id),"class.code")
+	set classcode=$g(^TempSaveData("practitioner",json.id,"class.code"))
 	
 	
 	S $p(result,"\",2)="i2b2"
@@ -41,33 +39,39 @@ ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 	Q result
 }
 
-ClassMethod ProviderId() As %String [ Private ]
+ClassMethod ProviderID(json As %DynamicObject) As %String [ Private ]
 {
-	// Автоматически генерируем код следующим образом: 
-	//в начале символы 'LCS-I2B2:D0001090' затем какой-то набор чисел. 
-	//Пример:LCS-I2B2:D000109065
-	Q "LCS-I2B2:D0001090"_$tr($now(),".,")
+	Q "LCS-I2B2:D0001090"_..GenerateNum(json) ;$tr($now(),".,")
 }
 
-ClassMethod NameChar(json As %DynamicObject) As %Library.String
+ClassMethod NameChar(json As %DynamicObject) As %Library.String [ Private ]
 {
-	//"Practitioner.name.family", "Practitioner.name.given", "Practitioner.name.prefix"
-	I '$IsObject(json.name) Q ""
-	set fam = json.name.family
-	set nam = ""
-	set prefix = ""
-	// И имя и префикс массивы. Выбираем все имена и префиксы или только первый?
-	set itr = json.name.given.%GetIterator()
-	If itr.%GetNext(.key,.val) {
-		S nam = val
-	}
-	set itr = json.name.prefix.%GetIterator()
-	If itr.%GetNext(.key,.val) {
-		S prefix = val
-	}
-	Set result = fam_", "_nam
-	if prefix '= "" {
-		S result = result_", "_prefix
+	s result=""
+	I '$IsObject(json.name) Q result
+	set itr = json.name.%GetIterator() 
+	If itr.%GetNext(.key,.obj) {
+		;w !,obj.%ToJSON(),!!
+		set fam = obj.family
+		set nam = ""
+		set prefix = ""
+		if $IsObject(obj.given) {
+			set itr = obj.given.%GetIterator()
+			s key=""
+			If itr.%GetNext(.key,.val) {
+				S nam = val
+			}
+		}
+		if $IsObject(obj.prefix) {
+			set itr = obj.prefix.%GetIterator()
+			s key=""
+			If itr.%GetNext(.key,.val) {
+				S prefix = val
+			}
+		}
+		Set result = fam_", "_nam
+		if $g(prefix) '= "" {
+			S result = result_", "_prefix
+		}
 	}
 	Q result
 }
