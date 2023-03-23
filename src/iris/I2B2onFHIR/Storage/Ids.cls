@@ -10,6 +10,7 @@ Property fhirId As %String(MAXLEN = "");
 /// I2B2 ID (1,2,3,...)
 Property i2b2Id As %String(MAXLEN = "");
 
+/// Property i2b2Link As %String;
 Storage Default
 {
 <Data name="IdsDefaultData">
@@ -25,9 +26,15 @@ Storage Default
 <Value name="4">
 <Value>i2b2Id</Value>
 </Value>
+<Value name="5">
+<Value>i2b2Link</Value>
+</Value>
 </Data>
 <DataLocation>^I2B2onFHIR.Storage.IdsD</DataLocation>
 <DefaultData>IdsDefaultData</DefaultData>
+<Description>
+<![CDATA[Property i2b2Link As %String;]]></Description>
+<ExtentSize>0</ExtentSize>
 <IdLocation>^I2B2onFHIR.Storage.IdsD</IdLocation>
 <IndexLocation>^I2B2onFHIR.Storage.IdsI</IndexLocation>
 <StreamLocation>^I2B2onFHIR.Storage.IdsS</StreamLocation>

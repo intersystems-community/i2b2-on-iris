@@ -8,15 +8,17 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.PatientMapingTransformResponse).%New()
         set target.downloaddate=..DownloadDate(source.json)
         set target.importdate=..CurrentDT()
-        set target.patientide=source.json."ID"
+        set target.patientide=source.json."id"
         set target.patientidesource=..IdeSource()
-        set target.patientidestatus=source.json."deceasedBoolean"."ID"
-        set target.patientnum=..getI2B2ID("patient", source.json."ID") //..GenerateNum(source.json)
-        set target.projectid=""
+        set target.patientidestatus=source.json."_deceasedBoolean"."id"
+        do ..ProjectID(.projectid)
+        set target.projectid=$S(projectid'="":projectid,1:"TEST")
         set target.sourcesystemcd=..SourceSystemCD(source.json)
         set target.updatedate=..CurrentDT()
         set target.uploaddate=..CurrentDT()
-        set target.uploadid= ..getI2B2ID("patient", source.json."ID") //..UploadId(source.json)
+
+        set target.patientnum = ..getI2B2ID("patient", source.json."id",,"patient_dimension") //..UploadId(source.json)
+        set target.uploadid = target.patientnum
 
 	} catch e {
 		s sc = e.AsStatus()

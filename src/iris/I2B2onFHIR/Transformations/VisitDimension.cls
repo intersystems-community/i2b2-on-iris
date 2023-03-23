@@ -8,8 +8,7 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target = ##class(I2B2onFHIR.Messages.VisitDimensionTransformResponse).%New()
         set target.activestatuscd= ..ActiveStatusCD(source.json)
         set target.downloaddate=..CurrentDT()
-        set target.encounternum=..getI2B2ID("encounter", source.json."ID") //encounter_mapping.encounter_num 
-        set target.enddate=source.json.period.end
+        set target.enddate=$tr($p(source.json.period.end,"+"),"T"," ")
         set target.importdate=..CurrentDT()
         set target.inoutcd=..InoutCD(source.json)
         set target.lengthofstay=..LengthOfStay(source.json)
@@ -17,20 +16,42 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
         set target.locationpath=""
         set refType = $p(source.json."subject"."reference", "/", 1)
         set refId = $p(source.json."subject"."reference", "/", 2)
-        set target.patientnum=..getI2B2ID(refType, refId) //patient_mapping.patient_num 
+        set target.patientnum=##class(I2B2onFHIR.Utils.Main).getI2B2ID(refType, refId, 1) //patient_mapping.patient_num 
         set target.sourcesystemcd=..SourceSystemCD(source.json)
-        set target.startdate=source.json.period.start
+        set target.startdate=$tr($p(source.json.period.start,"+"),"T"," ")
         set target.updatedate=..CurrentDT()
-        set target.uploadid= ..getI2B2ID("encounter", source.json."ID") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
+        
+        //Index visitdimensionpk On (encounternum, patientnum) [ PrimaryKey, SqlName = visit_dimension_pk, Type = index, Unique ];
+        set target.encounternum= ..getI2B2ID("encounter", source.json."id",$lb(target.patientnum),"visit_dimension") //..UploadId(source.json) ;is empty IN IRIS.  I think that there should be an ID from care evolution, but it should be an int type
+        set target.uploadid = target.encounternum //encounter_mapping.encounter_num 
         set target.visitblob=""
+        
+        do ..TempSaveData(source.json)
 	} catch e {
 		s sc = e.AsStatus()
 	}
 	q sc
 }
 
+ClassMethod TempSaveData(json As %DynamicObject) As %Status [ Private ]
+{
+	S itr = json.participant.%GetIterator()
+	while itr.%GetNext(.key,.value) {
+		s val = value."individual"."reference"
+		i val="" continue
+		S ^TempSaveData($zcvt($p(val,"/"),"L"),$p(val,"/",2))=json.id
+		if json.class.code '= "" {
+			S ^TempSaveData($zcvt($p(val,"/"),"L"),$p(val,"/",2),"class.code")=json.class.code
+		}
+	}
+	Q $$$OK
+}
+
 ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 {
+	// переделал на Lookup
+	q ..Lookup("lookup.visitdimention.activestatus",json.status,"NULL",2)
+	/*
 	I json.status="planned" Q "PRELIMINARY"
 	I json.status="arrived" Q "ACTIVE"
 	I json.status="triaged" Q "ACTIVE"
@@ -41,6 +62,7 @@ ClassMethod ActiveStatusCD(json As %DynamicObject) As %String [ Private ]
 	I json.status="entered-in-error" Q "NULL"
 	I json.status="unknown" Q "NULL"
 	Q "NULL"
+	*/
 }
 
 ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]
@@ -53,11 +75,14 @@ ClassMethod LengthOfStay(json As %DynamicObject) As %Integer [ Private ]
 
 ClassMethod InoutCD(json As %DynamicObject) As %String [ Private ]
 {
+	q ..Lookup("lookup.visitdimention.inout",json.status,"")
+	/*
 	I json.classHistory.class="inpatient" Q "IP"
 	I json.classHistory.class="outpatient" Q "OP"
 	I json.classHistory.class="ambulatory" Q "AV"
 	I json.classHistory.class="emergency" Q "ED"
 	Q ""
+	*/
 }
 
 }

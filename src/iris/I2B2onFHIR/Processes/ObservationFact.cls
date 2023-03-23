@@ -9,6 +9,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.ObservationFactBPRequest, Outpu
 {
     set sc = $$$OK
     try {
+	    $$$TRACE("ObservationFact start")
 		// transform data
 		#dim observationFactTransformResponse As I2B2onFHIR.Messages.ObservationFactTransformResponse
 		set sc = ##class(I2B2onFHIR.Transformations.ObservationFact).Transform(pRequest, .observationFactTransformResponse)
@@ -25,7 +26,7 @@ Method OnRequest(pRequest As I2B2onFHIR.Messages.ObservationFactBPRequest, Outpu
 		quit:$$$ISERR(sc)
         
 
-        $$$TRACE("ObservationFact")
+        $$$TRACE("ObservationFact end")
 	} catch e {
 		s sc = e.AsStatus()
 	}
@@ -38,3 +39,4 @@ Storage Default
 }
 
 }
+

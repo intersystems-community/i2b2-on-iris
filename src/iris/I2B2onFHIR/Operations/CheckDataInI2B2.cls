@@ -48,7 +48,7 @@ Method providerDimensionCheck(pRequest As I2B2onFHIR.Messages.ProviderDimensionT
 
       set tr = ts.%Execute(pRequest.uploadid)
       if tr.%Next() {
-        set pResponse.recordId = tr.%ID
+        set pResponse.recordId = tr.%D
       
       } else {
         set pResponse.recordId = -1
@@ -74,7 +74,7 @@ Method visitDimensionCheck(pRequest As I2B2onFHIR.Messages.VisitDimensionTransfo
 
       set tr = ts.%Execute(pRequest.uploadid)
       if tr.%Next() {
-        set pResponse.recordId = tr.%ID
+        set pResponse.recordId = tr.ID
       
       } else {
         set pResponse.recordId = -1
@@ -100,7 +100,7 @@ Method encounterMappingCheck(pRequest As I2B2onFHIR.Messages.EncounterMappingTra
 
       set tr = ts.%Execute(pRequest.uploadid)
       if tr.%Next() {
-        set pResponse.recordId = tr.%ID
+        set pResponse.recordId = tr.ID
       
       } else {
         set pResponse.recordId = -1
@@ -126,7 +126,7 @@ Method patientMapingCheck(pRequest As I2B2onFHIR.Messages.PatientMapingTransform
 
 		  set tr = ts.%Execute(pRequest.uploadid)
 		  if tr.%Next() {
-        set pResponse.recordId = tr.%ID
+        set pResponse.recordId = tr.ID
         
       } else {
         set pResponse.recordId = -1
@@ -153,7 +153,7 @@ Method patientDimensionCheck(pRequest As I2B2onFHIR.Messages.PatientDimensionTra
 
 		set tr = ts.%Execute(pRequest.uploadid)
 		if tr.%Next() {
-            set pResponse.recordId = tr.%ID
+            set pResponse.recordId = tr.ID
         
         } else {
             set pResponse.recordId = -1
@@ -196,3 +196,4 @@ XData MessageMap
 }
 
 }
+

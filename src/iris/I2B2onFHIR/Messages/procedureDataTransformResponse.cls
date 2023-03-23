@@ -1,4 +1,5 @@
-Class I2B2onFHIR.Messages.procedureDataTransformResponse Extends Ens.Response
+/// fixed       Extends Ens.Response -> Extends Ens.Request
+Class I2B2onFHIR.Messages.procedureDataTransformResponse Extends Ens.Request
 {
 
 Storage Default
@@ -7,3 +8,4 @@ Storage Default
 }
 
 }
+

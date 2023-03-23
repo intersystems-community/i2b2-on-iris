@@ -1,4 +1,4 @@
-Class I2B2onFHIR.Messages.claimDataTransformResponse Extends Ens.Response
+Class I2B2onFHIR.Messages.claimDataTransformResponse Extends Ens.Request
 {
 
 Storage Default
@@ -7,3 +7,4 @@ Storage Default
 }
 
 }
+

@@ -10,6 +10,7 @@ Method GetProxyClass(pResourceType As %String) As %String
 {
 	q:pResourceType="Patient" "I2B2.FHIR.Proxy.Patient"
 	q:pResourceType="Practitioner" "I2B2.FHIR.Proxy.Practitioner"
+	q:pResourceType="MedicationRequest" "I2B2.FHIR.Proxy.MedicationRequest"
 	q ""
 }
 

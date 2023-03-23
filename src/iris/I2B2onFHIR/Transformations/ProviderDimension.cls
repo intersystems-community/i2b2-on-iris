@@ -1,11 +1,11 @@
-Class I2B2onFHIR.Transformations.Practitioner Extends I2B2onFHIR.Transformations.Base
+Class I2B2onFHIR.Transformations.ProviderDimension Extends I2B2onFHIR.Transformations.Base
 {
 
-ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.practitionerDataTransformResponse) As %Status
+ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, target As I2B2onFHIR.Messages.ProviderDimensionTransformResponse) As %Status
 {
 	s sc = $$$OK
 	try {
-        set target = ##class(I2B2onFHIR.Messages.practitionerDataTransformResponse).%New()
+        set target = ##class(I2B2onFHIR.Messages.ProviderDimensionTransformResponse).%New()
         set target.downloaddate=..CurrentDT()
         set target.importdate=..CurrentDT()
         set target.namechar=..NameChar(source.json)
@@ -25,14 +25,20 @@ ClassMethod Transform(source As I2B2onFHIR.Messages.dataTransformRequestBase, ta
 
 ClassMethod ProviderPath(json As %DynamicObject) As %String [ Private ]
 {
-	//Concat:('\i2b2\Providers\', Encounter.classHistory.class, '\' , provider_dimension.name_char, '\')
+	//Concat:('\i2b2\Providers\', Encounter.class.code, '\' , provider_dimension.name_char, '\')
 	//A string representing the unique position of a provider in a hierarchical department tree.
 	//Example:          \i2b2\Providers\Emergency\Carter, John, MD\
+	
+	
+	set classcode=$g(^TempSaveData("practitioner",json.id),"class.code")
+	
+	
 	S $p(result,"\",2)="i2b2"
 	S $p(result,"\",3)="Providers"
-	S $p(result,"\",4)="" ;Encounter.classHistory.class -- Как получить здесь???
+	S $p(result,"\",4)=classcode ;Encounter.class.code -- Как получить здесь???
 	S $p(result,"\",5)=..NameChar(json)
 	S $p(result,"\",6)=""
+	Q result
 }
 
 ClassMethod ProviderId() As %String [ Private ]
@@ -46,6 +52,7 @@ ClassMethod ProviderId() As %String [ Private ]
 ClassMethod NameChar(json As %DynamicObject) As %Library.String
 {
 	//"Practitioner.name.family", "Practitioner.name.given", "Practitioner.name.prefix"
+	I '$IsObject(json.name) Q ""
 	set fam = json.name.family
 	set nam = ""
 	set prefix = ""
@@ -66,3 +73,4 @@ ClassMethod NameChar(json As %DynamicObject) As %Library.String
 }
 
 }
+
