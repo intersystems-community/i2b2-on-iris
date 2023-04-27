@@ -115,6 +115,7 @@ Q: I get error `tar: data.gof: Wrote only ... of ... bytes tar: Exiting with fai
 
 A: Make sure that docker has enough free space for image creation. Use `prune` command to free up space. See `https://docs.docker.com/config/pruning/` for detailed instructions.
 
-## Notice
+## Notices
 
-The project uses the intersystemsdc/irishealth-community:2022.1.1.374.0-zpm container. The license key in this container will expire on October 18, 2023.
+- The project uses the intersystemsdc/irishealth-community:2022.1.1.374.0-zpm container. The license key in this container will expire on October 18, 2023.
+- Migrated from https://gitlab.com/i3335/i2b2-on-iris in March, 2023
